@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>B2B Client Score – Peer Cohort Methodology | Model Whitepaper</title>
+<style>
+  :root {
+    /* Onity 2025 template theme (ppt/theme/theme1.xml) */
+    --onity-blue: #2F20EF;      /* accent1 – brand */
+    --onity-navy: #160C63;      /* dark brand band */
+    --onity-lime: #CFF91C;      /* accent2 */
+    --onity-sky: #00A1FF;       /* accent3 */
+    --onity-green: #09BC09;     /* accent4 */
+    --onity-yellow: #F1E105;    /* accent5 */
+    --onity-gray: #929292;      /* accent6 */
+    --ink: #1C1C28;
+    --dk2: #383838;
+    --mute: #6B7280;
+    --lt2: #F4F4F4;
+    --line: #E3E5EE;
+    --tint: #ECEBFE;
+    --old: #C8102E;
+    --old-tint: #FBE9EC;
+    --win: #1B8A5A;
+    --win-tint: #E7F4EE;
+    --amber: #B26B00;
+    --amber-tint: #FBEFD8;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; font-family: Arial, Helvetica, sans-serif; color: var(--ink); background: #fff; font-size: 15px; line-height: 1.55; }
+  a { color: var(--onity-blue); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code, .mono { font-family: Consolas, "Courier New", monospace; font-size: 0.88em; background: var(--lt2); padding: 1px 5px; border-radius: 3px; color: var(--dk2); }
+
+  /* ---------- Masthead ---------- */
+  .masthead { background: var(--onity-navy); color: #fff; padding: 34px 56px 30px; }
+  .masthead .brandrow { display: flex; justify-content: space-between; align-items: center; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; color: #B9B3F7; }
+  .wordmark { font-weight: 700; font-size: 26px; letter-spacing: 0; text-transform: none; color: #fff; }
+  .wordmark span { color: var(--onity-lime); }
+  .masthead h1 { font-size: 34px; margin: 22px 0 6px; line-height: 1.2; font-weight: 700; }
+  .masthead .sub { font-size: 17px; color: #D6D2FB; margin: 0 0 22px; max-width: 980px; }
+  .meta { display: flex; flex-wrap: wrap; gap: 10px 28px; font-size: 13px; color: #D6D2FB; border-top: 1px solid #3B2F9E; padding-top: 14px; }
+  .meta b { color: #fff; font-weight: 700; }
+  .pill { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+  .pill.live { background: var(--onity-lime); color: var(--onity-navy); }
+  .pill.conf { background: transparent; border: 1px solid #8E86F2; color: #fff; }
+
+  /* ---------- Layout ---------- */
+  .wrap { display: grid; grid-template-columns: 270px minmax(0, 1fr); max-width: 1480px; margin: 0 auto; }
+  nav.toc { position: sticky; top: 0; align-self: start; max-height: 100vh; overflow-y: auto; padding: 26px 18px 40px 28px; border-right: 1px solid var(--line); font-size: 13.5px; background: #FBFBFE; }
+  nav.toc .toctitle { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--mute); margin-bottom: 10px; font-weight: 700; }
+  nav.toc ol { list-style: none; margin: 0; padding: 0; counter-reset: toc; }
+  nav.toc li { margin: 2px 0; }
+  nav.toc a { display: block; padding: 5px 8px; border-radius: 4px; color: var(--dk2); }
+  nav.toc a:hover { background: var(--tint); color: var(--onity-blue); text-decoration: none; }
+  nav.toc .sub a { padding-left: 22px; font-size: 12.5px; color: var(--mute); }
+  main { padding: 30px 56px 80px; min-width: 0; }
+
+  section { padding-top: 18px; margin-bottom: 30px; }
+  h2 { font-size: 25px; color: var(--onity-navy); margin: 26px 0 6px; padding-top: 8px; }
+  h2 .num { color: var(--onity-blue); margin-right: 10px; }
+  h3 { font-size: 18px; color: var(--onity-navy); margin: 26px 0 8px; }
+  h4 { font-size: 15px; color: var(--dk2); margin: 18px 0 6px; text-transform: uppercase; letter-spacing: 1px; }
+  .lede { font-size: 16.5px; color: var(--dk2); max-width: 1000px; }
+  p { max-width: 1060px; }
+  ul, ol { max-width: 1040px; }
+  li { margin: 4px 0; }
+
+  /* ---------- Components ---------- */
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; margin: 18px 0 8px; }
+  .kpi { background: var(--tint); border-radius: 8px; padding: 16px 18px; }
+  .kpi .n { font-size: 30px; font-weight: 700; color: var(--onity-blue); line-height: 1.1; }
+  .kpi .l { font-weight: 700; font-size: 13.5px; margin-top: 4px; }
+  .kpi .d { font-size: 12.5px; color: var(--mute); margin-top: 3px; }
+  .kpi.green { background: var(--win-tint); } .kpi.green .n { color: var(--win); }
+
+  .band { background: var(--onity-navy); color: #fff; border-radius: 8px; padding: 18px 24px; margin: 18px 0; }
+  .band h4 { color: var(--onity-lime); margin-top: 0; }
+  .band p, .band li { color: #E4E1FC; }
+
+  .callout { border: 1px solid var(--onity-blue); background: #F7F6FF; border-radius: 8px; padding: 14px 18px; margin: 16px 0; max-width: 1060px; }
+  .callout.warn { border-color: var(--amber); background: var(--amber-tint); }
+  .callout.old { border-color: var(--old); background: var(--old-tint); }
+  .callout.ok { border-color: var(--win); background: var(--win-tint); }
+  .callout .t { font-weight: 700; margin-bottom: 4px; color: var(--onity-navy); }
+  .callout.warn .t { color: var(--amber); }
+  .callout.old .t { color: var(--old); }
+  .callout.ok .t { color: var(--win); }
+
+  .formula { font-family: Cambria, Georgia, "Times New Roman", serif; font-size: 17px; background: #FBFBFE; border-left: 4px solid var(--onity-blue); padding: 12px 18px; margin: 12px 0; border-radius: 0 6px 6px 0; max-width: 1000px; }
+  .formula .c { font-family: Arial, sans-serif; font-size: 12.5px; color: var(--mute); display: block; margin-top: 4px; }
+
+  table { border-collapse: collapse; width: 100%; margin: 12px 0 6px; font-size: 13.5px; }
+  .tblwrap { overflow-x: auto; max-width: 100%; }
+  th { background: var(--onity-navy); color: #fff; text-align: left; padding: 9px 10px; font-weight: 700; vertical-align: bottom; }
+  td { padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  tr:nth-child(even) td { background: #FAFAFC; }
+  td.r, th.r { text-align: right; }
+  td.c, th.c { text-align: center; }
+  .src { font-size: 12px; color: var(--mute); font-style: italic; margin: 2px 0 14px; }
+  .oldc { color: var(--old); font-weight: 700; }
+  .newc { color: var(--onity-blue); font-weight: 700; }
+  .tag { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; white-space: nowrap; }
+  .tag.f { background: var(--win-tint); color: var(--win); }
+  .tag.n { background: var(--lt2); color: var(--dk2); }
+  .tag.u { background: var(--old-tint); color: var(--old); }
+  .tag.b { background: var(--tint); color: var(--onity-blue); }
+  .tag.a { background: var(--amber-tint); color: var(--amber); }
+
+  /* pipeline */
+  .pipe { display: grid; grid-template-columns: minmax(0, 1fr) 34px minmax(0, 1fr) 34px minmax(0, 1fr); align-items: stretch; margin: 20px 0; }
+  .stage code, td code { overflow-wrap: anywhere; }
+  .stage { border: 1px solid var(--line); border-top: 5px solid var(--onity-blue); border-radius: 8px; padding: 14px 16px; background: #fff; }
+  .stage .s { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--onity-blue); font-weight: 700; }
+  .stage .h { font-size: 16.5px; font-weight: 700; color: var(--onity-navy); margin: 4px 0 6px; }
+  .stage .b { font-size: 13px; color: var(--dk2); }
+  .stage .o { margin-top: 10px; font-size: 12.5px; background: var(--tint); border-radius: 5px; padding: 6px 8px; }
+  .arrow { display: flex; align-items: center; justify-content: center; color: var(--onity-blue); font-size: 26px; font-weight: 700; }
+  .freq { font-size: 12px; color: var(--mute); margin-top: 6px; }
+
+  /* steps */
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 14px 0; }
+  .step { background: var(--lt2); border-radius: 8px; padding: 12px 14px; position: relative; }
+  .step .k { width: 26px; height: 26px; border-radius: 50%; background: var(--onity-blue); color: #fff; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; margin-bottom: 6px; }
+  .step .h { font-weight: 700; color: var(--onity-navy); }
+  .step .b { font-size: 13px; color: var(--dk2); }
+  .step .v { font-size: 22px; font-weight: 700; color: var(--onity-blue); margin-top: 6px; }
+
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .card { border: 1px solid var(--line); border-radius: 8px; padding: 14px 18px; }
+  .card.oldcard { border-top: 5px solid var(--old); }
+  .card.newcard { border-top: 5px solid var(--onity-blue); }
+  .card h4 { margin-top: 2px; }
+
+  .bars { margin: 8px 0; }
+  .barrow { display: grid; grid-template-columns: 110px minmax(0, 700px) 120px; align-items: center; gap: 8px; margin: 5px 0; font-size: 13px; }
+  .bar { height: 14px; border-radius: 3px; }
+  .bar.o { background: var(--old); } .bar.n { background: var(--onity-blue); }
+
+  details { border: 1px solid var(--line); border-radius: 6px; padding: 10px 14px; margin: 8px 0; max-width: 1060px; }
+  details summary { cursor: pointer; font-weight: 700; color: var(--onity-navy); }
+  details[open] summary { margin-bottom: 6px; }
+
+  footer { background: var(--onity-blue); color: #fff; padding: 12px 56px; font-size: 12px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+
+  @media (max-width: 1000px) {
+    .wrap { grid-template-columns: 1fr; }
+    nav.toc { position: static; max-height: none; border-right: 0; border-bottom: 1px solid var(--line); }
+    main, .masthead { padding-left: 22px; padding-right: 22px; }
+    .pipe { grid-template-columns: 1fr; }
+    .arrow { transform: rotate(90deg); height: 30px; }
+    .two { grid-template-columns: 1fr; }
+  }
+  @media print {
+    nav.toc { display: none; }
+    .wrap { display: block; }
+    main { padding: 10px 24px; }
+    .masthead, .band, th, footer, .kpi, .tag, .step .k { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    section { page-break-inside: auto; }
+    h2 { page-break-before: auto; page-break-after: avoid; }
+    table, .callout, .formula { page-break-inside: avoid; }
+    details { border: 0; padding: 0; }
+    details > summary { list-style: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="masthead" id="top">
+  <div class="brandrow">
+    <div class="wordmark">Onity<span>.</span></div>
+    <div>Data Science &amp; Analytics · Model Documentation</div>
+  </div>
+  <h1>B2B Client Score — Peer Cohort Methodology</h1>
+  <p class="sub">Model whitepaper and single reference for what the B2B score is, how it is built, how it is used, where the data and code live, and how the peer cohort approach differs from the legacy model-CPR score.</p>
+  <div class="meta">
+    <div>Version <b>1.0</b></div>
+    <div>Last updated <b>November 23, 2026</b></div>
+    <div>Model owner <b>Data Science &amp; Analytics (DSA)</b></div>
+    <div>Business owner <b>B2B / Correspondent &amp; Co-Issue</b></div>
+    <div>Status <span class="pill live">PRODUCTION · GO-LIVE NOV 2026</span></div>
+    <div><span class="pill conf">Proprietary &amp; Confidential</span></div>
+  </div>
+</header>
+
+<div class="wrap">
+<nav class="toc" aria-label="Table of contents">
+  <div class="toctitle">Contents</div>
+  <ol>
+    <li><a href="#s0">0. Document control</a></li>
+    <li><a href="#s1">1. Executive summary</a></li>
+    <li><a href="#s2">2. What the B2B score is &amp; how it is used</a></li>
+    <li><a href="#s3">3. Score architecture</a></li>
+    <li><a href="#s4">4. End-to-end pipeline</a></li>
+    <li><a href="#s5">5. Stage 1 — Build peer cohorts</a></li>
+    <li class="sub"><a href="#s5-data">Training data</a></li>
+    <li class="sub"><a href="#s5-drivers">Driver analysis</a></li>
+    <li class="sub"><a href="#s5-bands">Bands &amp; merge rules</a></li>
+    <li class="sub"><a href="#s5-results">Results &amp; validation</a></li>
+    <li><a href="#s6">6. Stage 2 — Assign cohorts to loans</a></li>
+    <li><a href="#s7">7. Stage 3 — Produce the score</a></li>
+    <li class="sub"><a href="#s7-cpr">CPRScore</a></li>
+    <li class="sub"><a href="#s7-recap">RecapScore &amp; TotalScore</a></li>
+    <li class="sub"><a href="#s7-fallback">Fallbacks &amp; edge cases</a></li>
+    <li class="sub"><a href="#s7-fun">F / N / U tags</a></li>
+    <li class="sub"><a href="#s7-example">Worked example</a></li>
+    <li><a href="#s8">8. Legacy vs peer cohort</a></li>
+    <li><a href="#s9">9. Where things are</a></li>
+    <li><a href="#s10">10. Operating procedure</a></li>
+    <li><a href="#s11">11. Monitoring &amp; governance</a></li>
+    <li><a href="#s12">12. Limitations &amp; open items</a></li>
+    <li><a href="#s13">13. FAQ</a></li>
+    <li><a href="#s14">14. Glossary</a></li>
+    <li><a href="#appA">Appendix A — Band reference</a></li>
+    <li><a href="#appB">Appendix B — Source reconciliation</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<!-- ===================================================== 0 -->
+<section id="s0">
+  <h2><span class="num">0</span>Document control</h2>
+  <p>This is a living document. Update it whenever cohort definitions, scoring rules, source tables or the operating procedure change. Every number here comes from the production code and its recorded outputs. Where a slide or an earlier methodology note disagrees with the code, the code wins (see <a href="#appB">Appendix B</a>).</p>
+  <div class="tblwrap"><table>
+    <tr><th style="width:190px">Item</th><th>Detail</th></tr>
+    <tr><td>Model name</td><td>B2B Client Score (CPRScore × RecapScore → TotalScore), Peer Cohort methodology. Cohort artifact schema <code>version 4</code>.</td></tr>
+    <tr><td>Scope</td><td>Correspondent and Co-Issue clients (sellers) whose loans are serviced by Onity. Scores client prepayment and recapture against look-alike peer loans.</td></tr>
+    <tr><td>Replaces</td><td>Legacy B2B score that benchmarked actual CPR against loan-level valuation-model CPR (<code>ModelCPR</code>). Python port of <code>Analytics_Rpt.Rpt.usp_md_B2BPricingReporting</code>.</td></tr>
+    <tr><td>Model owner</td><td>Data Science &amp; Analytics (DSA). Primary contact: Shashi (DSA).</td></tr>
+    <tr><td>Business users</td><td>B2B pricing, Correspondent / Co-Issue account management, Capital Markets, Finance, Executive leadership.</td></tr>
+    <tr><td>Refresh cadence</td><td>Monthly, after the month-end <code>B2BPricingHist</code> load. Cohort definitions are refreshed only on a scheduled model review.</td></tr>
+    <tr><td>Source of truth</td><td>Code and notebooks listed in <a href="#s9">Section 9</a>. Earlier materials are background only.</td></tr>
+  </table></div>
+  <h4>Change log</h4>
+  <div class="tblwrap"><table>
+    <tr><th style="width:130px">Date</th><th style="width:110px">Version</th><th>Change</th></tr>
+    <tr><td>Pre-Oct 2026</td><td>Legacy</td><td>Legacy B2B score: <code>CPRScore = ActualCPR ÷ ModelCPR</code>, with <code>ModelCPR</code> taken from the loan-level valuation model (<code>Finance_DM.md.MSRValuesLoanLevel</code>).</td></tr>
+    <tr><td>2026 (archived)</td><td>Cohort schema v2</td><td>First cohort design used investor type, loan age, FICO, balance and rate spread (164 cohorts). Superseded. Files sit in <code>cohorts_band/archive/</code>.</td></tr>
+    <tr><td>Oct 2026</td><td>Cohort schema v4</td><td>Current design uses LoanType, RemainingTerm, FICO, balance and rate spread, giving 116 cohort rules (109 populated). Trained on the Jun-2026 and Jul-2026 tapes.</td></tr>
+    <tr><td>Oct 28, 2026</td><td>—</td><td>Executive review deck (<em>B2B_CPRScore_Exec_Deck_10212026.pdf</em>) and Go / No-Go decision by the B2B team.</td></tr>
+    <tr><td>Nov 2026 (wk 1)</td><td>Production</td><td>Peer cohort CPRScore went live. DQ score refresh is the next phase.</td></tr>
+    <tr><td>Nov 23, 2026</td><td>Whitepaper 1.0</td><td>First release of this document.</td></tr>
+  </table></div>
+</section>
+
+<!-- ===================================================== 1 -->
+<section id="s1">
+  <h2><span class="num">1</span>Executive summary</h2>
+  <p class="lede">The B2B score asks one question about each correspondent and co-issue client: <b>do its loans pay off faster, and get recaptured less, than look-alike loans from other lenders?</b> The new method sorts every loan into a fixed <b>peer cohort</b> when the loan is priced. It then compares the client's actual prepayment speed with the actual speed of all peer loans in the same cohorts. The legacy method compared it with a model forecast.</p>
+
+  <div class="kpis">
+    <div class="kpi"><div class="n">5</div><div class="l">Loan features define a peer</div><div class="d">Loan type · remaining term · original FICO · balance · note rate vs market</div></div>
+    <div class="kpi"><div class="n">116</div><div class="l">Cohort rules (109 with training data)</div><div class="d">Built from 1,728 candidate cells. 7 rules cover missing-term edge cases only</div></div>
+    <div class="kpi"><div class="n">75.2%</div><div class="l">Of prepay variation explained</div><div class="d">Training fit. Held-out loans: 76.3% (Jun-26) and 69.6% (Jul-26)</div></div>
+    <div class="kpi"><div class="n">12.26M</div><div class="l">Loan-months tagged</div><div class="d">567,351 funded loans, Feb-2023 to Sep-2026 (full rebuild)</div></div>
+    <div class="kpi green"><div class="n">100.0%</div><div class="l">Report-month coverage</div><div class="d">378,543 of 378,730 loan-months mapped (May-2026 run)</div></div>
+    <div class="kpi green"><div class="n">1.00</div><div class="l">Portfolio CPRScore by design</div><div class="d">The book is its own benchmark, so market-wide swings do not move every client at once</div></div>
+  </div>
+
+  <div class="band">
+    <h4>WHAT CHANGED VS THE LEGACY SCORE</h4>
+    <ul>
+      <li><b>The benchmark is realized, not modeled.</b> Legacy CPRScore divided client CPR by the valuation model's projected CPR. That forecast missed by different amounts for each loan type (VA: model 8.6% vs peers' actual 22.4%), which reordered clients. The legacy portfolio score was 0.64, not 1.00.</li>
+      <li><b>A loan's peer group is set once and never changes.</b> The cohort comes from the loan's attributes at lock (Correspondent) or funding (Co-Issue and Consumer Direct). It stays fixed for the life of the loan.</li>
+      <li><b>The fallbacks are relative to the portfolio and everything is auditable.</b> Clients with no prepayment are scaled off the portfolio score. Every published CPRScore can be rebuilt in Excel from the audit table <code>Analytics_Rpt.md.B2B_CPRScore_Audit</code>.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ===================================================== 2 -->
+<section id="s2">
+  <h2><span class="num">2</span>What the B2B score is &amp; how it is used</h2>
+  <h3>Purpose</h3>
+  <p>Onity buys and services loans from correspondent and co-issue clients. The value of that servicing depends mostly on <b>how long the loan stays on the books</b> (prepayment) and on <b>whether Onity keeps the borrower when the loan pays off</b> (recapture). Two clients can deliver loans with the same rate and FICO that still behave very differently after funding. The B2B score measures that client-specific behavior so pricing and purchase decisions can reflect it.</p>
+
+  <h3>The three outputs</h3>
+  <div class="tblwrap"><table>
+    <tr><th style="width:150px">Output</th><th>Question it answers</th><th style="width:230px">How to read it</th></tr>
+    <tr><td><b>CPRScore</b></td><td>Do this client's loans prepay faster or slower than peer loans in the same cohorts?</td><td><b>Lower is better.</b> 1.00 = same as peers; 0.72 = 28% slower; 1.33 = 33% faster.</td></tr>
+    <tr><td><b>RecapScore</b></td><td>When this client's loans pay off, does Onity recapture more or less balance than the benchmark recapture rate?</td><td><b>Higher is better.</b> 1.00 = at benchmark.</td></tr>
+    <tr><td><b>TotalScore</b></td><td>Taking both together, is this client's servicing worth more or less than average?</td><td><b>Higher is better.</b> <code>RecapScore ÷ CPRScore</code>.</td></tr>
+    <tr><td><b>F / N / U tag</b></td><td>Where does the client stand relative to the whole book?</td><td><span class="tag f">F</span> Favorable ≥ 1.25 × portfolio · <span class="tag n">N</span> Neutral · <span class="tag u">U</span> Unfavorable &lt; 0.75 × portfolio</td></tr>
+  </table></div>
+
+  <h3>How it is used</h3>
+  <ul>
+    <li><b>Client pricing and purchase mix.</b> The F / N / U tag feeds B2B pricing strategy. The Oct-2026 review set an illustrative target buy mix of <b>85% Favorable / 10% Neutral / 5% Unfavorable</b>. At the current ~3% overall win rate, that needs a 5.9% win rate on Favorable volume.</li>
+    <li><b>Account management.</b> Reports carry each client's Account Manager (East / West / Central) and seller IDs by sub-channel, so AEs can act on a score.</li>
+    <li><b>Drill-downs.</b> The same scores are cut by state, FICO, LTV, DTI, note rate, product, average loan balance, channel and client, plus Client × State and Client × State × Product views. These cuts show <i>where</i> a client is fast or slow.</li>
+    <li><b>Executive reporting.</b> Monthly production metrics track prediction accuracy, tag stability and purchase mix (see <a href="#s11">Section 11</a>).</li>
+  </ul>
+  <div class="callout"><div class="t">In one sentence</div>A client scores well only when its loans prepay slower than loans like its own, or when it recaptures more. The comparison is always against what peer loans actually did in the same months, never against a forecast.</div>
+</section>
+
+<!-- ===================================================== 3 -->
+<section id="s3">
+  <h2><span class="num">3</span>Score architecture</h2>
+  <div class="steps">
+    <div class="step"><div class="k">1</div><div class="h">Assign each loan to a cohort</div><div class="b">Once, at lock or funding, from five loan features. Stored in <code>B2B_revamp_cohorts</code>.</div></div>
+    <div class="step"><div class="k">2</div><div class="h">Measure the client's actual CPR</div><div class="b">Annualized balance run-off of the client's cohort-assigned loans over the score window.</div></div>
+    <div class="step"><div class="k">3</div><div class="h">Build the peer benchmark</div><div class="b">Actual CPR of <i>all</i> loans, from all clients, in the cohorts where the client has loans.</div></div>
+    <div class="step"><div class="k">4</div><div class="h">CPRScore = actual ÷ benchmark</div><div class="b">Below 1 means slower than peers, which is good.</div></div>
+    <div class="step"><div class="k">5</div><div class="h">TotalScore = RecapScore ÷ CPRScore</div><div class="b">Then tag F / N / U against the portfolio TotalScore.</div></div>
+  </div>
+  <div class="formula">TotalScore = RecapScore ÷ CPRScore &nbsp;&nbsp;|&nbsp;&nbsp; CPRScore = Client ActualCPR ÷ Peer-cohort ActualCPR &nbsp;&nbsp;|&nbsp;&nbsp; RecapScore = ActualRecap ÷ CohortRecap<span class="c">Exact formulas, windows and fallback rules are in <a href="#s7">Section 7</a>.</span></div>
+  <div class="callout warn"><div class="t">The valuation model sets who the peers are, not how fast they should prepay</div>Cohorts were <i>designed</i> with the valuation model's projected <code>ModelCPR</code>, which identified the features that drive prepayment and showed where to draw band edges. <b>Scoring never uses a projected CPR.</b> The benchmark is always the observed run-off of peer loans in the score window. The cohort statistics <code>Mean_CPR</code> / <code>Std_CPR</code> are kept in the tables for reference only.</div>
+</section>
+
+<!-- ===================================================== 4 -->
+<section id="s4">
+  <h2><span class="num">4</span>End-to-end pipeline</h2>
+  <div class="pipe">
+    <div class="stage">
+      <div class="s">Stage 1</div>
+      <div class="h">Construct peer cohorts</div>
+      <div class="b">Find the drivers of projected prepayment on two monthly loan tapes, cut them into business-friendly bands, and merge sparse or look-alike neighbors into reliable cohorts.</div>
+      <div class="o"><b>Output:</b> fixed lookup artifacts: <code>cohort_bands_config.json</code>, <code>prinbal_map.csv</code>, <code>spread_map.csv</code>, <code>cohort_definitions.csv</code></div>
+      <div class="freq">Runs on model refresh only · <code>cohorts_construction/Cohort_Analysis_w_FHA_VA_Oct26_train.ipynb</code></div>
+    </div>
+    <div class="arrow">→</div>
+    <div class="stage">
+      <div class="s">Stage 2</div>
+      <div class="h">Assign cohorts to every funded loan</div>
+      <div class="b">For every <code>LoanNum × AsofDt</code> in <code>B2BPricingHist</code>, pull attributes at the lock or fund date, compute rate spread against the blended market rate, and stamp one static cohort per loan.</div>
+      <div class="o"><b>Output:</b> <code>Analytics_Rpt.md.B2B_revamp_cohorts</code></div>
+      <div class="freq">Monthly (APPEND) · <code>cohorts_band/B2B_revamp_cohorts_build_FundDt.ipynb</code></div>
+    </div>
+    <div class="arrow">→</div>
+    <div class="stage">
+      <div class="s">Stage 3</div>
+      <div class="h">Produce the B2B score</div>
+      <div class="b">Join loan-month performance to cohorts. Compute client vs peer CPR, recapture and TotalScore for every report cut. Apply fallbacks, tag F / N / U, and publish the Excel file and audit tables.</div>
+      <div class="o"><b>Output:</b> <code>B2B_cohort_score_YYYYMMDD_upd.xlsx</code>, <code>md.B2B_CPRScore_Audit</code>, <code>md.B2B_ClientScore_final</code></div>
+      <div class="freq">Monthly · <code>repo/python/B2B_Reporting_cohort_score_customDates.ipynb</code></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================================================== 5 -->
+<section id="s5">
+  <h2><span class="num">5</span>Stage 1 — Construct peer cohorts</h2>
+  <p class="lede">Goal: group hundreds of thousands of loans into a small, explainable set of buckets. Every loan in a bucket should have about the same expected prepayment speed, and every bucket should hold enough loans to trust.</p>
+
+  <h3 id="s5-data">5.1 Training data and eligibility</h3>
+  <div class="tblwrap"><table>
+    <tr><th>Item</th><th>Value</th></tr>
+    <tr><td>Training tapes</td><td>Loan-level pricing tapes <code>LL_Pricing_06302026_Enriched.csv</code> and <code>LL_Pricing_07312026_Enriched.csv</code>, pooled. Each row carries the market rate for its own snapshot (6.490% Jun-26, 6.542% Jul-26).</td></tr>
+    <tr><td>Target</td><td><code>ModelCPR</code>: the valuation model's loan-level projected CPR. Pooled mean 6.24, std 4.64 after exclusions.</td></tr>
+    <tr><td>Eligibility filters</td><td>Active loans only (<code>PaidOff_Flag_ADM = 0</code>). PLS excluded. Sellers <code>OCWEN</code>, <code>OCWEN REO</code>, <code>UNKNOWN</code> and blank / null excluded. These are eligibility filters, not cohort features.</td></tr>
+    <tr><td>Data cleaning</td><td>FICO ≤ 300 or ≥ 850 → missing. LTV ≤ 0 or &gt; 150% → missing. Negative remaining term → missing. Values are set to NaN, not dropped. <code>CONV-PMI</code> normalizes to <code>CONV</code>. Any type other than CONV / FHA / VA becomes <code>OTHERS</code>.</td></tr>
+    <tr><td>Volume</td><td>1,646,280 active observations before exclusions. <b>1,210,118 observations / 626,132 distinct loans</b> after exclusions. 48.6% of rows are repeat monthly observations of the same loan.</td></tr>
+  </table></div>
+
+  <h3 id="s5-drivers">5.2 Driver analysis: which features matter</h3>
+  <p>Seven candidate features were tested two ways: correlation with <code>ModelCPR</code>, checked separately in each training month, and a shallow CART regression tree (depth 4 and 6, minimum leaf 2% of rows). A feature had to matter in <i>both</i> months to count.</p>
+  <div class="tblwrap"><table>
+    <tr><th>Feature</th><th class="r">Correlation (pooled)</th><th class="r">Jun-26</th><th class="r">Jul-26</th><th class="r">Tree importance (depth 6)</th><th>Used in cohort rules?</th></tr>
+    <tr><td>Rate spread (note rate − market rate)</td><td class="r">0.720</td><td class="r">0.741</td><td class="r">0.717</td><td class="r">92.7%</td><td><span class="tag f">Yes</span> 18 bands of 0.25 pt</td></tr>
+    <tr><td>Remaining term (months)</td><td class="r">0.357</td><td class="r">0.369</td><td class="r">0.353</td><td class="r">4.1%</td><td><span class="tag f">Yes</span> ≤ 240 / &gt; 240</td></tr>
+    <tr><td>Principal balance</td><td class="r">0.256</td><td class="r">0.270</td><td class="r">0.246</td><td class="r">2.5%</td><td><span class="tag f">Yes</span> 4 bands</td></tr>
+    <tr><td>Loan type (CONV / FHA / VA / OTHERS)</td><td class="r">—</td><td class="r">—</td><td class="r">—</td><td class="r">0.7%</td><td><span class="tag f">Yes</span> never merged</td></tr>
+    <tr><td>Original FICO</td><td class="r">0.033</td><td class="r">0.031</td><td class="r">0.035</td><td class="r">0.0%</td><td><span class="tag a">Yes, business rule</span> fixed split at 750</td></tr>
+    <tr><td>Original LTV</td><td class="r">0.012</td><td class="r">0.020</td><td class="r">0.005</td><td class="r">0.06%</td><td><span class="tag n">No</span></td></tr>
+    <tr><td>ARM flag</td><td class="r">0.118</td><td class="r">—</td><td class="r">—</td><td class="r">0.0%</td><td><span class="tag n">No</span> (2,302 ARM observations)</td></tr>
+    <tr><td>Investor category, loan age</td><td colspan="4">Excluded by design. Investor is used only for the PLS eligibility filter.</td><td><span class="tag n">No</span></td></tr>
+  </table></div>
+  <p class="src">Source: Cohort_Analysis_w_FHA_VA_Oct26_train.ipynb, sections 2–4. Tree R² = 0.725 (depth 4) / 0.736 (depth 6) on 1,143,566 complete rows.</p>
+  <p><b>Remaining term earned its place on held-out loans.</b> A test split by loan (20% of loans held out, so no loan appears on both sides) showed that adding term improves held-out R² in both months: 0.732 → 0.750 (Jun-26, +0.018) and 0.670 → 0.697 (Jul-26, +0.027). Term passed the importance, stability and held-out checks, so it was kept. The 240-month cut point is a business choice.</p>
+
+  <h3 id="s5-bands">5.3 Band design and merge algorithm</h3>
+  <h4>Starting bands (full Cartesian space = 1,728 cells)</h4>
+  <div class="tblwrap"><table>
+    <tr><th>Dimension</th><th>Starting bands</th><th class="c">#</th><th>Merged?</th></tr>
+    <tr><td>LoanType</td><td>CONV (incl. CONV-PMI), FHA, VA, OTHERS (USDA / FARM / unknown)</td><td class="c">4</td><td>Never</td></tr>
+    <tr><td>RemainingTermBand</td><td>≤ 240 mo, &gt; 240 mo, Missing (null or negative)</td><td class="c">3</td><td>Never</td></tr>
+    <tr><td>FICOOrigBand</td><td>≤ 750, &gt; 750. Missing / sentinel values default to ≤ 750</td><td class="c">2</td><td>Never</td></tr>
+    <tr><td>PrinBalBand</td><td>≤ $150K, $150–250K, $250–400K, &gt; $400K</td><td class="c">4</td><td>Yes, adjacent bands only (pass 1)</td></tr>
+    <tr><td>RateSpreadBand</td><td>(−∞, −2%], then 0.25-pt steps from −2% to +2%, then (+2%, +∞)</td><td class="c">18</td><td>Yes, adjacent bands only (pass 2)</td></tr>
+  </table></div>
+  <p>4 × 3 × 2 × 4 × 18 = 1,728 cells. Every combination keeps a slot, including empty ones, so any future loan always has a cohort. All intervals are right-inclusive (240 falls in ≤ 240).</p>
+
+  <h4>Merge rules (business parameters)</h4>
+  <p>Within each fixed <code>LoanType × Term × FICO</code> segment, the algorithm first merges adjacent <b>balance</b> bands. It then merges adjacent <b>spread</b> bands inside each resulting balance group. It repeatedly merges the single best adjacent pair until no trigger fires.</p>
+  <div class="tblwrap"><table>
+    <tr><th style="width:200px">Parameter</th><th class="r" style="width:90px">Value</th><th>Role</th></tr>
+    <tr><td><code>MIN_COHORT_N_FLOOR</code></td><td class="r">1,500</td><td><b>Forced merge.</b> A band with fewer than 1,500 observations must merge with a neighbor. Forced merges skip the inflation guard, so empty and tiny bands can always be absorbed (full coverage).</td></tr>
+    <tr><td><code>SE_MEAN_TARGET</code></td><td class="r">0.25 CPR pt</td><td><b>Precision trigger.</b> Merge if the standard error of the mean (Std ÷ √N) is above 0.25.</td></tr>
+    <tr><td><code>MEAN_MERGE_TOL</code></td><td class="r">0.5 CPR pt</td><td><b>Similarity trigger.</b> Merge neighbors whose mean CPRs are within 0.5 pt of each other.</td></tr>
+    <tr><td><code>STD_INFLATION_MAX</code></td><td class="r">1.20×</td><td><b>Guard.</b> Reject a non-forced merge if the pooled std would be more than 1.2× the tighter neighbor's std.</td></tr>
+    <tr><td><code>CV_FLAG_THRESHOLD</code></td><td class="r">0.25</td><td>Reporting flag only. Marks cohorts whose std is ≥ 25% of their mean.</td></tr>
+  </table></div>
+  <p>Merge priority: forced, then imprecise, then similar. Ties go to the lowest std inflation, then the smallest mean gap. Empty cells borrow interpolated means from their nearest populated neighbors, so they merge toward the closer-CPR side. Pooled statistics combine within- and between-band variance.</p>
+
+  <h3 id="s5-results">5.4 Results and validation</h3>
+  <div class="kpis">
+    <div class="kpi"><div class="n">116</div><div class="l">Final cohort rules</div><div class="d">109 populated · 7 extrapolated-only (Missing term, no training loans)</div></div>
+    <div class="kpi"><div class="n">75.2%</div><div class="l">Variance explained (train)</div><div class="d">Within-cohort std 2.31 vs overall 4.64</div></div>
+    <div class="kpi"><div class="n">0.763 / 0.696</div><div class="l">Held-out R² (Jun / Jul)</div><div class="d">Rules and means learned on 80% of loans</div></div>
+    <div class="kpi"><div class="n">107 / 109</div><div class="l">Meet SE precision target</div><div class="d">98.2% of populated cohorts</div></div>
+    <div class="kpi"><div class="n">0.77 pt</div><div class="l">Avg cross-month CPR range</div><div class="d">Loan-weighted, Jun vs Jul (descriptive)</div></div>
+    <div class="kpi"><div class="n">0.265</div><div class="l">Loan-weighted CV</div><div class="d">Weighted std 1.72 CPR pt</div></div>
+  </div>
+
+  <h4>Cohort mix by loan type</h4>
+  <div class="tblwrap"><table>
+    <tr><th>LoanType</th><th class="r">Rules</th><th class="r">Populated</th><th class="r">Training obs.</th><th class="r">% obs.</th><th class="r">% UPB</th></tr>
+    <tr><td>CONV</td><td class="r">50</td><td class="r">49</td><td class="r">1,030,967</td><td class="r">85.2%</td><td class="r">83.0%</td></tr>
+    <tr><td>FHA</td><td class="r">35</td><td class="r">33</td><td class="r">105,608</td><td class="r">8.7%</td><td class="r">9.4%</td></tr>
+    <tr><td>VA</td><td class="r">25</td><td class="r">23</td><td class="r">67,659</td><td class="r">5.6%</td><td class="r">7.3%</td></tr>
+    <tr><td>OTHERS</td><td class="r">6</td><td class="r">4</td><td class="r">5,884</td><td class="r">0.5%</td><td class="r">0.3%</td></tr>
+    <tr><td><b>Total</b></td><td class="r"><b>116</b></td><td class="r"><b>109</b></td><td class="r"><b>1,210,118</b></td><td class="r"><b>100%</b></td><td class="r"><b>100%</b></td></tr>
+  </table></div>
+  <p class="src">Source: cohorts_band/cohort_definitions.csv (identical to cohorts_construction/cohort_artifacts_FHA_VA_Oct26/, checksum-verified).</p>
+
+  <h4>Largest cohorts (training)</h4>
+  <div class="tblwrap"><table>
+    <tr><th>Rule</th><th class="r">Obs.</th><th class="r">UPB</th><th class="r">Mean CPR</th><th class="r">CV</th></tr>
+    <tr><td>CONV · FICO &gt; 750 · Term &gt; 240 · Bal ≤ $400K · Spread ≤ −1.75%</td><td class="r">202,060</td><td class="r">$47.1B</td><td class="r">3.49</td><td class="r">0.19</td></tr>
+    <tr><td>CONV · FICO ≤ 750 · Term &gt; 240 · Bal ≤ $400K · Spread ≤ −1.5%</td><td class="r">142,456</td><td class="r">$31.4B</td><td class="r">3.48</td><td class="r">0.28</td></tr>
+    <tr><td>CONV · FICO &gt; 750 · Term &gt; 240 · Bal ≤ $400K · Spread (−1%, −0.25%]</td><td class="r">86,196</td><td class="r">$21.2B</td><td class="r">6.70</td><td class="r">0.24</td></tr>
+    <tr><td>CONV · FICO &gt; 750 · Term ≤ 240 · Bal ≤ $250K · Spread ≤ −1%</td><td class="r">68,102</td><td class="r">$9.4B</td><td class="r">3.19</td><td class="r">0.30</td></tr>
+    <tr><td>CONV · FICO ≤ 750 · Term &gt; 240 · Bal ≤ $400K · Spread (−1.25%, −0.25%]</td><td class="r">53,987</td><td class="r">$12.1B</td><td class="r">6.28</td><td class="r">0.17</td></tr>
+  </table></div>
+  <p>Cohort mean CPR runs from 0.0 to 24.2 (median 6.9). That shows the cohorts separate slow out-of-the-money loans from fast in-the-money ones.</p>
+
+  <h4>Sensitivity: why a floor of 1,500</h4>
+  <div class="tblwrap"><table>
+    <tr><th class="r">Count floor</th><th class="r">Populated cohorts</th><th class="r">Loan-wtd CV</th><th class="r">Variance explained</th><th class="r">Meet SE target</th></tr>
+    <tr><td class="r">250</td><td class="r">193</td><td class="r">0.246</td><td class="r">79.3%</td><td class="r">91.7%</td></tr>
+    <tr><td class="r">500</td><td class="r">160</td><td class="r">0.254</td><td class="r">78.4%</td><td class="r">93.1%</td></tr>
+    <tr><td class="r">1,000</td><td class="r">130</td><td class="r">0.259</td><td class="r">76.4%</td><td class="r">97.7%</td></tr>
+    <tr style="font-weight:700"><td class="r">1,500 (used)</td><td class="r">109</td><td class="r">0.265</td><td class="r">75.2%</td><td class="r">98.2%</td></tr>
+    <tr><td class="r">2,500</td><td class="r">80</td><td class="r">0.317</td><td class="r">68.4%</td><td class="r">97.5%</td></tr>
+    <tr><td class="r">5,000</td><td class="r">61</td><td class="r">0.351</td><td class="r">62.1%</td><td class="r">96.7%</td></tr>
+    <tr><td class="r">10,000</td><td class="r">44</td><td class="r">0.404</td><td class="r">53.9%</td><td class="r">95.5%</td></tr>
+  </table></div>
+  <p>Above 1,500, CV rises sharply and fit falls (2,500 loses 6.8 pts of variance explained). Below 1,500, cohort count grows fast for little gain. The SE target is not binding at this data volume: tightening it from 1.00 to 0.15 leaves the count at 109, and it only drops at ≤ 0.10. In practice the count floor and the similarity tolerance set the number of cohorts.</p>
+  <p class="src">Source: Cohort_Analysis_w_FHA_VA_Oct26_train.ipynb, sections 7–13.</p>
+</section>
+
+<!-- ===================================================== 6 -->
+<section id="s6">
+  <h2><span class="num">6</span>Stage 2 — Assign cohorts to every funded loan</h2>
+  <p class="lede">Stage 2 applies the fixed Stage 1 lookups to every funded loan in <code>Analytics_Rpt.md.B2BPricingHist</code>. It uses the loan's attributes <b>at the pricing decision</b>, so each loan gets one cohort that never changes.</p>
+
+  <h3>6.1 Anchor date (<code>CohortBaseDt</code>)</h3>
+  <div class="tblwrap"><table>
+    <tr><th>Channel</th><th>Anchor date</th><th class="r">Loans</th><th>Notes</th></tr>
+    <tr><td>Correspondent</td><td><code>ADM.ODS.vwOrigLoan.LockDt</code>, or <code>FundDt</code> if the lock date is null</td><td class="r">256,228 (+2 fallback)</td><td>Lock is on average 18.1 days before funding</td></tr>
+    <tr><td>Co-Issue</td><td><code>FundDt</code></td><td class="r">279,215</td><td>No lock date in vwOrigLoan</td></tr>
+    <tr><td>Consumer Direct / other</td><td><code>FundDt</code></td><td class="r">31,906</td><td>Carried in the table; client scoring uses Correspondent and Co-Issue</td></tr>
+  </table></div>
+  <p class="src">Counts from the FULL_REBUILD run (B2BPricingHist through 2026-09-30).</p>
+
+  <h3>6.2 Cohort inputs at the anchor</h3>
+  <ul>
+    <li><b>Baseline snapshot.</b> Servicing attributes come from <code>ADM.ODS.vwServLoanHist</code> at <code>EOMONTH(CohortBaseDt)</code>. If that month-end snapshot does not exist yet (common for Correspondent, where the lock comes before boarding), the job moves forward <b>up to 3 months</b> to the first available snapshot. The snapshot used is recorded in <code>Base_AsofDt</code>. Correspondent coverage: 45.1% at M0, 89.2% by M+1, 98.9% by M+2, 99.9% by M+3.</li>
+    <li><b>Inputs (all <code>_Base</code>):</b> <code>LoanType_Base</code>, <code>RemainingTerm_Base</code> (rolled back to the anchor month by adding the months between anchor and snapshot), <code>FICOOrig_Base</code>, <code>PrinBal_Base</code>, <code>IntRate_Base</code> and <code>Market_Rate_Base</code>.</li>
+    <li><b>Market rate.</b> The average of the latest observation on or before the anchor date for three 30-year series in <code>ADM.Ext.MarketRates</code>: <code>MORTGAGE30US</code> (Freddie Mac PMMS, weekly), <code>OBMMIC30YF</code> (Optimal Blue, daily) and <code>MND_30Y</code> (Mortgage News Daily, daily, from Dec-2022). Stored ×100 as a percent.</li>
+    <li><b>Rate spread</b> = <code>IntRate_Base − Market_Rate_Base</code>.</li>
+  </ul>
+
+  <h3>6.3 Static assignment and invariance</h3>
+  <p>The job pulls one row per loan, runs <code>assign_cohorts()</code> (normalize, band, then join <code>prinbal_map</code> → <code>spread_map</code> → <code>cohort_definitions</code>), and stages the result. A single <code>UPDATE</code> then writes it to every snapshot row for that loan. A critical check confirms that <b>no loan has more than one <code>cohort_unique_ID</code></b> across months. The latest run passed with 0 violations.</p>
+  <div class="tblwrap"><table>
+    <tr><th>Cohort column</th><th>Definition</th></tr>
+    <tr><td><code>cohort_unique_ID</code></td><td><code>C###</code>: sequence number of the cohort rule, sorted on the five cohort keys. Constant across all months. <b>This is the key used for scoring</b> (as <code>Cohort_ID</code> in Stage 3).</td></tr>
+    <tr><td><code>Cohort_ID</code></td><td><code>YYYYMM_C###</code>, where YYYYMM is the anchor month. Shows when the loan entered its cohort.</td></tr>
+    <tr><td><code>Rule_Bucket</code></td><td>Readable rule text, e.g. <i>LoanType=CONV | FICOOrig &gt;750 | RemainingTerm &gt;240mo | PrinBal (-Inf, 400k] | RateSpread (-0.25%, 0%]</i></td></tr>
+    <tr><td><code>Mean_CPR</code>, <code>Std_CPR</code></td><td>Training-period cohort statistics (reference only; not used in the score).</td></tr>
+  </table></div>
+
+  <h3>6.4 Run modes</h3>
+  <div class="tblwrap"><table>
+    <tr><th style="width:170px"><code>RUN_MODE</code></th><th>What it does</th><th>When to use</th></tr>
+    <tr><td><code>APPEND</code></td><td>Inserts new month(s) from <code>NEW_MONTHS</code> (or finds missing months automatically) and assigns cohorts to rows where <code>Cohort_ID IS NULL</code>.</td><td><b>Routine monthly update.</b></td></tr>
+    <tr><td><code>COHORT_REFRESH</code></td><td>Leaves the base table as is. Clears all cohort columns and re-assigns every loan.</td><td>After new cohort definitions are approved. All history is re-scored on the new basis.</td></tr>
+    <tr><td><code>FULL_REBUILD</code></td><td>Drops and rebuilds the table from <code>B2BPricingHist</code>, then assigns cohorts to all rows.</td><td>First build, or when baseline logic changes.</td></tr>
+  </table></div>
+
+  <h3>6.5 Latest build validation</h3>
+  <div class="tblwrap"><table>
+    <tr><th>Check</th><th>Result</th></tr>
+    <tr><td>Row count vs source</td><td>12,258,573 = 12,258,573 <span class="tag f">PASS</span> · 567,351 distinct loans · 44 month-ends (2023-02-28 → 2026-09-30)</td></tr>
+    <tr><td>Cohort mapping</td><td>567,075 loans mapped (100.0%). 276 loans (6,456 rows, 0.05%) unmapped because baseline balance, rate or type is missing. 0 loans landed in an extrapolated-only cohort.</td></tr>
+    <tr><td>Invariance</td><td>0 loans with more than one cohort <span class="tag f">PASS</span></td></tr>
+    <tr><td>Cohorts in use</td><td>Co-Issue 104 · Correspondent 106 · Consumer Direct 103</td></tr>
+  </table></div>
+</section>
+
+<!-- ===================================================== 7 -->
+<section id="s7">
+  <h2><span class="num">7</span>Stage 3 — Produce the B2B score</h2>
+  <p class="lede">The reporter class <code>B2BPricingReporter</code> (in <code>B2B_functions_cohort_score_logfallback.py</code>) loads four frames once. It then builds every report cut in pandas.</p>
+
+  <h3>7.1 Inputs, windows and filters</h3>
+  <div class="tblwrap"><table>
+    <tr><th style="width:170px">Frame</th><th>Source</th><th>Window and filters</th></tr>
+    <tr><td><b>Performance</b><br>(<code>perform_all</code>)</td><td><code>Analytics_Rpt.md.B2BPricingHist2</code> ⨝ <code>ADM.ODS.vwOrigLoan</code> ⟕ <code>Analytics_Rpt.md.B2B_revamp_cohorts</code> (on <code>LoanNum + AsofDt</code>)</td><td><b>Score window:</b> <code>AsofDt</code> between <code>pi_BeginScoreDt</code> and <code>pi_EndScoreDt</code>, for loans of <i>any</i> funding vintage. <code>FundedLoanAmt &gt; 0</code>; not PR / VI / GU; not reverse; loan never XFER-resolved and never in channel Bulk.</td></tr>
+    <tr><td><b>Volume</b><br>(<code>volume_all</code>)</td><td><code>ADM.ODS.vwOrigLoan</code></td><td><b>Funding window:</b> default is the trailing 12 full months (first day of the month 13 months back to the last month-end). Channel in Correspondent / Co-Issue; <code>Client</code> not null; same exclusions. Drives LoanCt, FundedLoanAmt, VolumeRank, GovtPct, WAFICO / WALTV / WADTI / WAC.</td></tr>
+    <tr><td>Client / seller</td><td><code>ADM.ODS.vwOrigLoan</code></td><td>Account Manager by region and source seller IDs by sub-channel, within the funding window.</td></tr>
+    <tr><td>Output template</td><td><code>ADM.ODS.vwOrigLoan</code></td><td>Full list of report rows for each cut, so empty cells still appear.</td></tr>
+  </table></div>
+  <p><b>Report cuts</b> (<code>METRIC_ORDER</code>): Total, State, FICO, LTV, DTI, Interest Rate, Product, Avg Loan Bal, Channel, Client. <b>Product loop:</b> All, Conventional, FHA, VA, USDA, Govt (FHA + VA + USDA). The display bands here (e.g. FICO 780+ / 740 / 700 …) are <i>reporting slices</i>. They are separate from the cohort bands.</p>
+  <p><b>Actual run-off</b> comes from <code>BeginPrinBal</code> (balance at <code>AsofDt</code>) and <code>EndPrinBal</code> (next month-end) in the source table. In the <code>B2BPricingHist</code> build (<code>Finance_DM.md.usp_md_B2BPricing</code>), <code>EndPrinBal</code> is 0 for a payoff (PIF), the same balance for other resolutions, the next balance when the balance drops by $10K or more in the month, and otherwise the same balance. Actual CPR therefore measures <b>voluntary prepayment</b>: payoffs and large curtailments.</p>
+
+  <h3 id="s7-cpr">7.2 CPRScore: peer cohort method</h3>
+  <p>Within the score window, for any report group <i>g</i> (a client, a state, a Client × State cell, etc.), using only <b>cohort-assigned</b> loan-months:</p>
+  <div class="formula">ActualCPR<sub>g</sub> = 1 − ( Σ<sub>g</sub> EndPrinBal ÷ Σ<sub>g</sub> BeginPrinBal )<sup>12</sup><span class="c">The client's own pooled run-off across all of its cohort-assigned loan-months, annualized.</span></div>
+  <div class="formula">PeerCPR<sub>g</sub> = 1 − ( Σ<sub>c ∈ C(g)</sub> CohortEndBal<sub>c</sub> ÷ Σ<sub>c ∈ C(g)</sub> CohortBeginBal<sub>c</sub> )<sup>12</sup><span class="c">C(g) = the set of cohorts in which group g has loans. Cohort balances are pooled over <b>all clients</b> in the same performance frame, and each cohort is counted once (code label: <code>Cohort_ActualCPR</code>).</span></div>
+  <div class="formula">CPRScore<sub>g</sub> = ActualCPR<sub>g</sub> ÷ PeerCPR<sub>g</sub><span class="c">Exported as <code>Client_ActualCPR</code>, <code>Cohort_ActualCPR</code>, <code>CPRScore</code>. For the <b>Total</b> row, C(g) is every cohort, so the portfolio CPRScore is 1.00 by construction.</span></div>
+  <div class="callout"><div class="t">How the benchmark is weighted</div>Each cohort in C(g) enters the benchmark with its <b>total peer balance</b>, not with the client's share of its own balance. A client with even one loan-month in a large cohort brings that whole cohort's balance into its benchmark. This matches the published calculation in the Oct-2026 deck (e.g. "every lender's loans, same 81 cohorts: 1 − ($812B ÷ $822B)<sup>12</sup>") and is checked in the notebook (Validation 2: max difference 0.00e+00 across 975 clients). See <a href="#s12">Section 12</a>.</div>
+
+  <h3 id="s7-recap">7.3 RecapScore and TotalScore</h3>
+  <p>Recapture uses payoff loan-months with <code>PIFBal &gt; 0</code> and <code>PIFReason</code> ∈ {Purchase, Rate/Term Refinance, Cash-Out Refinance}:</p>
+  <div class="formula">ActualRecap<sub>g</sub> = Σ RecapBal ÷ Σ PIFBal &nbsp;&nbsp;·&nbsp;&nbsp; CohortRecap<sub>g</sub> = Σ (CohortRecap × PIFBal) ÷ Σ PIFBal &nbsp;&nbsp;·&nbsp;&nbsp; RecapScore<sub>g</sub> = ActualRecap<sub>g</sub> ÷ CohortRecap<sub>g</sub><span class="c"><code>RecapBal</code> = new-loan amount funded by Onity on the payoff. <code>CohortRecap</code> = loan-level benchmark recapture rate, read from <code>B2BPricingHist2</code>.</span></div>
+  <div class="formula">TotalScore<sub>g</sub> = RecapScore<sub>g</sub> ÷ CPRScore<sub>g</sub></div>
+  <p>The recapture formulas are the same as in the legacy score. What changed is the <b>source</b> of <code>CohortRecap</code>. The legacy score read <code>B2BPricingHist</code>, where the benchmark recapture rate is computed by payoff month × product category × payoff purpose × peer-recapture eligibility (<code>Finance_DM.md.usp_md_B2BPricing</code>). The new score reads <code>B2BPricingHist2</code>. Per the Oct-2026 deck, its benchmark is set "at the overall portfolio level, by payoff reason and payoff month" (Recapture V2).</p>
+
+  <h3 id="s7-fallback">7.4 Fallbacks and edge cases</h3>
+  <p><code>MIN_COHORT_LOANS = 20</code> is the single loan-count cutoff (N) used by the CPR default and by the zero-CPR fallback.</p>
+  <div class="tblwrap"><table>
+    <tr><th style="width:36px">#</th><th>Situation</th><th>Rule applied</th></tr>
+    <tr><td>1</td><td>Group has no cohort-assigned loans (PLS / unmapped only)</td><td>CPRScore = <b>1.0</b> (neutral). <code>Client_ActualCPR</code> is shown on all loans. Unmapped loans never enter either side of the CPR ratio.</td></tr>
+    <tr><td>2</td><td>Group has fewer than 20 loan-months in the score window</td><td>CPRScore = <b>1.0</b>.</td></tr>
+    <tr><td>3</td><td>Peer benchmark ≤ 0 or undefined</td><td>CPRScore = <b>1.0</b>.</td></tr>
+    <tr><td>4</td><td>Recapture: benchmark null / 0, fewer than 5 payoff loan-months, or ActualRecap undefined</td><td>RecapScore = <b>1.0</b>.</td></tr>
+    <tr><td>5</td><td>RecapScore = 0 (eligible payoffs but nothing recaptured)</td><td>TotalScore = <b>0.5 ÷ CPRScore</b>.</td></tr>
+    <tr><td>6</td><td><b>Zero prepayment</b>: <code>Client_ActualCPR = 0</code> (any non-Total row)</td><td>TotalScore = <b>Portfolio TotalScore × m(n)</b>, where n = CPR loan-months and m(n) = 1.0 if n &lt; 20, else 1.25 × log<sub>10</sub>(n). Examples: n = 20 → 1.63×, n = 100 → 2.50×, n = 1,000 → 3.75×. In Client × State × Product views the benchmark is the TotalScore of that product.</td></tr>
+    <tr><td>7</td><td>F / N / U tag</td><td>Assigned only to <code>MetricName = 'Client'</code> rows of the All-product report (<code>rawTotal</code>).</td></tr>
+  </table></div>
+  <div class="callout warn"><div class="t">Why rule 6 changed</div>With no payoffs at all, CPRScore = 0 and RecapScore ÷ CPRScore is undefined. The legacy score replaced it with an absolute 1.25 × log<sub>10</sub>(n). That was not comparable once the portfolio score was no longer about 1. The new rule anchors the reward to the current portfolio TotalScore and scales it with the client's evidence, so a perfect record earns more credit the more loan-months back it up.</div>
+
+  <h3 id="s7-fun">7.5 F / N / U classification</h3>
+  <div class="formula">Z = TotalScore on the All / Total / Total row &nbsp;&nbsp;·&nbsp;&nbsp; <span style="color:var(--win)"><b>F</b></span> if TotalScore ≥ 1.25 Z &nbsp;&nbsp;·&nbsp;&nbsp; <span style="color:var(--old)"><b>U</b></span> if TotalScore &lt; 0.75 Z &nbsp;&nbsp;·&nbsp;&nbsp; <b>N</b> otherwise<span class="c">Implemented in <code>B2B_functions_fun_classification.py</code> and written as the last column (<code>FUN_Classification</code>) of <code>rawTotal</code>.</span></div>
+
+  <div class="band">
+    <h4>LATEST RECORDED RUN (NOTEBOOK OUTPUT)</h4>
+    <p>Score window <b>2025-10-31 → 2026-05-31</b> · funding window <b>2025-11-01 → 2026-10-31</b> · portfolio ActualCPR = peer CPR = <b>12.66%</b> (CPRScore 1.000) · Z = <b>1.0021</b> (F ≥ 1.2526, U &lt; 0.7515) · <b>806 clients</b> tagged: <b>314 F · 262 N · 230 U</b> · audit: 1,059 clients across 106 cohorts. Results depend on the windows chosen. The Oct-2026 deck used a different May-2026 window (807 clients: 270 F · 236 N · 301 U).</p>
+  </div>
+
+  <h3>7.6 Outputs</h3>
+  <div class="tblwrap"><table>
+    <tr><th style="width:250px">Output</th><th>Content</th></tr>
+    <tr><td>Excel <code>B2B_cohort_score_YYYYMMDD_upd.xlsx</code><br><span class="src">Cohort_Analysis/B2B_reporting_raw/</span></td><td><code>rawTotal</code> (with FUN tag) · <code>rawConv</code> · <code>rawFHA</code> · <code>rawVA</code> · <code>rawUSDA</code> · <code>rawGovt</code> · <code>rawClientState</code> · <code>rawClientStateProduct</code> · <code>cprAuditWide</code> (one row per client, with cohort blocks for SUMPRODUCT rebuild) · <code>cprAuditLong</code> (one row per Client × Cohort, including excluded cells and the reason)</td></tr>
+    <tr><td><code>Analytics_Rpt.md.B2B_CPRScore_Audit</code></td><td>Long audit table (rows with a rule bucket). Written with <code>if_exists='replace'</code> when <code>PUSH_CPR_AUDIT_TO_SQL = True</code>. Latest push: 33,418 rows × 19 columns.</td></tr>
+    <tr><td><code>Analytics_Rpt.md.B2B_ClientScore_final</code></td><td>Client rows of <code>rawTotal</code> (MetricName … TotalScore + FUN_Classification, 22 columns). Push is off by default (<code>PUSH_CLIENT_SCORES_TO_SQL = False</code>). Enable it only after the Excel file is verified.</td></tr>
+  </table></div>
+  <p><b>Built-in reconciliations:</b> the audit CPRScore matches <code>rawTotal</code> for all 772 matched clients (max difference 0). The peer benchmark matches the summed cohort balances for 975 clients (max difference 0). The <code>rawTotal</code> read-back keeps the original columns, with FUN as the last column.</p>
+
+  <h3 id="s7-example">7.7 Worked example</h3>
+  <p class="src" style="font-style:normal">Illustration from the Oct-2026 executive deck (May-2026 run): American Pacific Mortgage, #5 client by volume, $1.72B funded, 28,794 loan-months in 81 cohorts.</p>
+  <div class="steps">
+    <div class="step"><div class="k">1</div><div class="h">Client CPR</div><div class="b">Its own loans, pooled over 81 cohorts: 1 − ($9.55B ÷ $9.70B)<sup>12</sup></div><div class="v">17.2%</div></div>
+    <div class="step"><div class="k">2</div><div class="h">Peer benchmark</div><div class="b">All lenders' loans in the same 81 cohorts: 1 − ($812B ÷ $822B)<sup>12</sup></div><div class="v">12.9%</div></div>
+    <div class="step"><div class="k">3</div><div class="h">CPRScore</div><div class="b">17.2% ÷ 12.9%. Prepays 33% faster than peers.</div><div class="v">1.33</div></div>
+    <div class="step"><div class="k">4</div><div class="h">TotalScore</div><div class="b">Recapture 29.1% vs 32.1% = 0.91; 0.91 ÷ 1.33</div><div class="v">0.68</div></div>
+    <div class="step"><div class="k">5</div><div class="h">Tag</div><div class="b">0.68 ÷ portfolio 1.00 = 0.68× &lt; 0.75×</div><div class="v"><span class="tag u" style="font-size:15px">Unfavorable</span></div></div>
+  </div>
+  <p>Under the legacy score the same client's benchmark was 9.7% (model CPR). That gave CPRScore 1.78, TotalScore 0.52 and 0.82× the legacy portfolio score (0.64): <b>Neutral</b>. Against look-alike loans, its speed stands out.</p>
+</section>
+
+<!-- ===================================================== 8 -->
+<section id="s8">
+  <h2><span class="num">8</span>Legacy score vs peer cohort score</h2>
+  <div class="two">
+    <div class="card oldcard">
+      <h4 class="oldc">Legacy: model benchmark</h4>
+      <p>Client CPR ÷ <b>balance-weighted average of loan-level <code>ModelCPR</code></b> (the valuation model's projected lifetime CPR from <code>Finance_DM.md.MSRValuesLoanLevel</code>, stored in <code>B2BPricingHist</code>).</p>
+      <p>Measures how a client did against a <i>forecast</i>. Any forecast bias for a loan type or rate environment passes straight into every client's score.</p>
+    </div>
+    <div class="card newcard">
+      <h4 class="newc">Peer cohort: realized benchmark</h4>
+      <p>Client CPR ÷ <b>pooled actual CPR of all peer loans</b> in the same fixed cohorts, over the same months.</p>
+      <p>Measures how a client did against <i>loans like its own</i> in the same market. Market-wide moves cancel, and the portfolio scores 1.00.</p>
+    </div>
+  </div>
+
+  <h3>Side-by-side</h3>
+  <div class="tblwrap"><table>
+    <tr><th style="width:210px">Dimension</th><th class="oldc" style="background:var(--onity-navy);color:#FFB3BF">Legacy score</th><th style="background:var(--onity-navy);color:var(--onity-lime)">Peer cohort score</th></tr>
+    <tr><td>Prepay benchmark</td><td>Loan-level valuation-model <code>ModelCPR</code>, weighted by <code>BeginPrinBal</code></td><td>Observed pooled CPR of peer loans in the client's cohorts</td></tr>
+    <tr><td>Peer definition</td><td>None. Each loan is compared with its own forecast.</td><td>116 cohort rules on 5 features, fixed at lock or funding</td></tr>
+    <tr><td>Portfolio-level score</td><td>Not anchored. Portfolio TotalScore was 0.64 in May-2026, because the model benchmark ran below actual CPR</td><td>Portfolio CPRScore = 1.00 by construction. Portfolio TotalScore ≈ 1.00 (latest Z = 1.002)</td></tr>
+    <tr><td>Recapture benchmark</td><td><code>B2BPricingHist.CohortRecap</code>: payoff month × product × payoff reason × peer-recap flag</td><td><code>B2BPricingHist2.CohortRecap</code>: portfolio level by payoff reason and month (V2)</td></tr>
+    <tr><td>Performance source</td><td><code>Analytics_Rpt.md.B2BPricingHist</code></td><td><code>Analytics_Rpt.md.B2BPricingHist2</code> + <code>B2B_revamp_cohorts</code></td></tr>
+    <tr><td>PLS / unmapped loans</td><td>Included in CPR</td><td>Excluded from both sides of CPR (still counted in volume)</td></tr>
+    <tr><td>Territories PR / VI / GU</td><td>Not excluded from performance or volume queries</td><td>Excluded from all queries</td></tr>
+    <tr><td>Low-data CPR default</td><td>CPRScore = 1.0 if ModelCPR = 0 or &lt; 10 loan-months</td><td>CPRScore = 1.0 if &lt; 20 loan-months, no cohort data, or benchmark ≤ 0</td></tr>
+    <tr><td>Zero-prepay fallback</td><td>TotalScore = 1.0 if n ≤ 20, else 1.25 × log<sub>10</sub>(n) (absolute)</td><td>TotalScore = portfolio TotalScore × [1.0 if n &lt; 20, else 1.25 × log<sub>10</sub>(n)] (relative)</td></tr>
+    <tr><td>Date control</td><td>Score and funding windows</td><td>Score and funding windows, plus a historical <code>report_as_of_dt</code> mode</td></tr>
+    <tr><td>Auditability</td><td>Report output only</td><td><code>cprAuditWide</code> / <code>cprAuditLong</code> and <code>md.B2B_CPRScore_Audit</code>. Any client's score can be rebuilt in Excel.</td></tr>
+    <tr><td>Code</td><td><code>B2B_Reporting_monthly_report3_w_oldCPR_oldRecap.ipynb</code> + <code>B2B_functions_monthly_report3_w_oldCPR_oldRecap_logfallback.py</code></td><td><code>B2B_Reporting_cohort_score_customDates.ipynb</code> + <code>B2B_functions_cohort_score_logfallback.py</code></td></tr>
+  </table></div>
+
+  <h3>Why scores move</h3>
+  <p>Each client's own CPR is the same under both methods. Only the yardstick changes. In the May-2026 comparison, the model benchmark was <b>lower than the peer benchmark for 745 of 807 clients</b>, and the gap differed a lot by loan type:</p>
+  <div class="bars">
+    <div class="barrow"><div>Conventional</div><div><div class="bar o" style="width:32%"></div><div class="bar n" style="width:49.2%;margin-top:3px"></div></div><div>8.0% / 12.3%</div></div>
+    <div class="barrow"><div>FHA</div><div><div class="bar o" style="width:31.2%"></div><div class="bar n" style="width:28.4%;margin-top:3px"></div></div><div>7.8% / 7.1%</div></div>
+    <div class="barrow"><div>VA</div><div><div class="bar o" style="width:34.4%"></div><div class="bar n" style="width:89.6%;margin-top:3px"></div></div><div>8.6% / 22.4%</div></div>
+  </div>
+  <p class="src"><span class="oldc">■ Legacy model benchmark</span> &nbsp; <span class="newc">■ Peer cohort benchmark</span> · Source: Oct-2026 exec deck, May-2026 run.</p>
+  <p>The model under-predicted VA prepayment most, so VA-heavy lenders looked far worse under the legacy score than their peers really were. USAA (100% VA) moved from Unfavorable (CPRScore 3.27) to Favorable (1.34). Lenders that prepay faster than their own look-alikes, such as American Pacific and Tomo, moved down.</p>
+  <div class="tblwrap"><table>
+    <tr><th>Impact (May-2026, as presented)</th><th class="r">Legacy</th><th class="r">Peer cohort</th></tr>
+    <tr><td>Clients Favorable / Neutral / Unfavorable</td><td class="r">326 / 277 / 204</td><td class="r">270 / 236 / 301</td></tr>
+    <tr><td>Share of funded volume F / N / U</td><td class="r">49% / 30% / 21%</td><td class="r">43% / 25% / 32%</td></tr>
+    <tr><td>Clients keeping the same tag</td><td class="r" colspan="2">66% of clients (75% of volume). Opposite reversals: 0.5% of clients</td></tr>
+  </table></div>
+</section>
+
+<!-- ===================================================== 9 -->
+<section id="s9">
+  <h2><span class="num">9</span>Where things are</h2>
+  <h3>SQL tables</h3>
+  <p>All tables are on server <code>VMC2VMDBRADC01P</code> (Windows authentication, ODBC Driver 17 for SQL Server).</p>
+  <div class="tblwrap"><table>
+    <tr><th style="width:330px">Table</th><th style="width:110px">Role</th><th>Content and key</th></tr>
+    <tr><td><code>Analytics_Rpt.md.B2B_revamp_cohorts</code></td><td><span class="tag b">Output · Stage 2</span></td><td>One row per funded <code>LoanNum × AsofDt</code> (key and clustered index). Display attributes at AsofDt; anchor fields (<code>Channel, FundDt, LockDt, CohortBaseDt, CohortBaseDtType, Base_AsofDt</code>); <code>*_Base</code> cohort inputs; <code>Rule_Bucket, Mean_CPR, Std_CPR, Cohort_ID, cohort_unique_ID</code>. 30 columns.</td></tr>
+    <tr><td><code>Analytics_Rpt.md.B2B_CPRScore_Audit</code></td><td><span class="tag b">Output · Stage 3</span></td><td>Client × Cohort audit: loan-months, balances, client and peer CPR, CPRScore, <code>Included_Flag</code>, <code>ExclusionReason</code>, <code>ReportAsofDt</code>.</td></tr>
+    <tr><td><code>Analytics_Rpt.md.B2B_ClientScore_final</code></td><td><span class="tag b">Output · Stage 3</span></td><td>Final client scores and FUN tag (when push is enabled).</td></tr>
+    <tr><td><code>Analytics_Rpt.md.B2B_cohort_funddt_staging</code></td><td><span class="tag n">Transient</span></td><td>Per-loan staging table, created and dropped during Stage 2.</td></tr>
+    <tr><td><code>Analytics_Rpt.md.B2BPricingHist</code></td><td><span class="tag a">Input</span></td><td>Month-end loan-level B2B history (key <code>LoanNum + AsofDt</code>, lowercase <i>o</i>). Loan universe for Stage 2; XFER / Bulk exclusion for volume. Built by <code>Finance_DM.md.usp_md_B2BPricing</code>.</td></tr>
+    <tr><td><code>Analytics_Rpt.md.B2BPricingHist2</code></td><td><span class="tag a">Input</span></td><td>Performance source for Stage 3: balances, PIF and recapture fields, and <code>CohortRecap</code> (V2 recapture benchmark).</td></tr>
+    <tr><td><code>ADM.ODS.vwOrigLoan</code></td><td><span class="tag a">Input</span></td><td>Origination attributes: <code>LockDt, FundDt, Client, Channel, SubChannel, ProductCategory, FICO, LTV, DTI, Rate, FundedLoanAmt, MortgageType, Region, AEName, SourceSellerID</code>.</td></tr>
+    <tr><td><code>ADM.ODS.vwServLoanHist</code></td><td><span class="tag a">Input</span></td><td>Month-end servicing snapshot: <code>FICOOrig, PrinBal, IntRate, TermRemaining, LoanType, InvestorCatgy, OrigDt</code> at AsofDt and at the anchor month.</td></tr>
+    <tr><td><code>ADM.Ext.MarketRates</code></td><td><span class="tag a">Input</span></td><td>Series <code>MORTGAGE30US, OBMMIC30YF, MND_30Y</code> by <code>RateDt</code> (decimal fractions).</td></tr>
+    <tr><td><code>Finance_DM.md.MSRValuesLoanLevel</code></td><td><span class="tag n">Legacy</span></td><td>Source of the loan-level <code>ModelCPR</code> used by the legacy benchmark.</td></tr>
+  </table></div>
+
+  <h3>Code and artifacts</h3>
+  <p>Paths are relative to the repository root <code>B2B-Pricing-Model/</code>.</p>
+  <div class="tblwrap"><table>
+    <tr><th style="width:120px">Stage</th><th>File</th><th>Purpose</th></tr>
+    <tr><td>1</td><td><code>cohorts_construction/Cohort_Analysis_w_FHA_VA_Oct26_train.ipynb</code></td><td>Driver analysis, banding, merging, validation, sensitivity, artifact export</td></tr>
+    <tr><td>1</td><td><code>cohorts_construction/cohort_artifacts_FHA_VA_Oct26/</code></td><td>Exported artifacts plus evidence files (<code>cohort_holdout_metrics.csv</code>, <code>remainingterm_tree_ablation.csv</code>)</td></tr>
+    <tr><td>2</td><td><code>cohorts_band/B2B_revamp_cohorts_build_FundDt.ipynb</code></td><td>Builds and maintains <code>md.B2B_revamp_cohorts</code></td></tr>
+    <tr><td>2</td><td><code>cohorts_band/cohort_bands_config.json</code>, <code>prinbal_map.csv</code>, <code>spread_map.csv</code>, <code>cohort_definitions.csv</code></td><td>Production lookup artifacts (schema v4) read by Stage 2</td></tr>
+    <tr><td>2</td><td><code>cohorts_band/cohort_README.md</code></td><td>Assignment guide and tested reference implementation</td></tr>
+    <tr><td>3</td><td><code>repo/python/B2B_Reporting_cohort_score_customDates.ipynb</code></td><td>Entry point: parameters, load, AllMetrics, Client × State (× Product), audit, FUN, Excel, SQL push</td></tr>
+    <tr><td>3</td><td><code>repo/python/functions/B2B_functions_cohort_score_logfallback.py</code></td><td><code>B2BPricingReporter</code>, cohort CPRScore, recapture, TotalScore and fallbacks</td></tr>
+    <tr><td>3</td><td><code>repo/python/functions/B2B_functions_cpr_audit.py</code></td><td>Independent rebuild of CPRScore and the audit tables</td></tr>
+    <tr><td>3</td><td><code>repo/python/functions/B2B_functions_fun_classification.py</code></td><td>F / N / U tagging and client score table</td></tr>
+    <tr><td>Legacy</td><td><code>repo/python/B2B_Reporting_monthly_report3_w_oldCPR_oldRecap.ipynb</code> + <code>functions/B2B_functions_monthly_report3_w_oldCPR_oldRecap_logfallback.py</code></td><td>Legacy score (Python port of <code>repo/sql/Analytics_Rpt.Rpt.usp_md_B2BPricingReporting.sql</code>)</td></tr>
+    <tr><td>Upstream</td><td><code>repo/sql/Finance_DM.md.usp_md_B2BPricing.sql</code></td><td>Builds <code>B2BPricingHist</code> (balances, ModelCPR, recapture fields)</td></tr>
+    <tr><td>Docs</td><td><code>model_documentation/</code></td><td>This whitepaper, the Oct-2026 exec deck, the earlier cohort methodology note</td></tr>
+  </table></div>
+  <p>Run notebooks in the <b>Python (B2B)</b> kernel (environment <code>B2B</code>).</p>
+</section>
+
+<!-- ===================================================== 10 -->
+<section id="s10">
+  <h2><span class="num">10</span>Operating procedure</h2>
+  <h3>Monthly run</h3>
+  <ol>
+    <li><b>Confirm upstream data.</b> Month-end <code>B2BPricingHist</code> and <code>B2BPricingHist2</code> are loaded for the new <code>AsofDt</code>.</li>
+    <li><b>Stage 2, APPEND.</b> In <code>B2B_revamp_cohorts_build_FundDt.ipynb</code> set <code>RUN_MODE = 'APPEND'</code> and <code>NEW_MONTHS = ['YYYY-MM-DD']</code> (or <code>[]</code> to find missing months automatically). Run all cells. Check: row count matches the source, mapped share is about 100%, and the invariance check shows 0 loans with multiple cohorts.</li>
+    <li><b>Stage 3, score.</b> In <code>B2B_Reporting_cohort_score_customDates.ipynb</code> set <code>pi_BeginScoreDt</code> / <code>pi_EndScoreDt</code> (performance months) and leave funding dates as <code>None</code> for the trailing-12-month default. Run all cells.</li>
+    <li><b>Check the output.</b> Total-row CPRScore = 1.0; report-month cohort coverage about 100%; audit reconciliations at 0 difference; review top clients and tag changes.</li>
+    <li><b>Publish.</b> Distribute the Excel file. Push <code>B2B_CPRScore_Audit</code> and, once the Excel file is verified, <code>B2B_ClientScore_final</code>. Both pushes replace the existing tables.</li>
+  </ol>
+  <h3>Cohort refresh (model review)</h3>
+  <ol>
+    <li>Point Stage 1 at new training tapes (<code>TRAIN_SRCS</code>). Re-run the driver, sensitivity and held-out checks, and document any parameter changes.</li>
+    <li>Export the artifacts under a new schema or version. Do not overwrite the current ones until the new set is approved.</li>
+    <li>Copy the approved artifacts to <code>cohorts_band/</code> and run Stage 2 with <code>RUN_MODE = 'COHORT_REFRESH'</code>, so <b>all history is re-scored on the same basis</b>.</li>
+    <li>Run Stage 3, compare against the prior run, and update this document (change log, Sections 5–7).</li>
+  </ol>
+</section>
+
+<!-- ===================================================== 11 -->
+<section id="s11">
+  <h2><span class="num">11</span>Monitoring &amp; governance</h2>
+  <div class="tblwrap"><table>
+    <tr><th style="width:150px">Metric</th><th>Question</th><th>Measure</th><th>Watch for</th></tr>
+    <tr><td><b>1 · Prediction</b></td><td>Do high-CPRScore clients actually prepay faster than their peers over the next 3 months, and low scorers slower?</td><td>Share of F and U tags confirmed by the next 3 months' performance (back-test: 287 correct calls of 805 clients)</td><td>A sustained drop below back-test levels</td></tr>
+    <tr><td><b>2 · Stability</b></td><td>Do tags hold as new data comes in?</td><td>Share of clients keeping their tag from one refresh to the next, and the number changing tag</td><td>Spikes in tag changes among large clients</td></tr>
+    <tr><td><b>3 · Purchase mix</b></td><td>How much do we buy from F vs U clients?</td><td>Funded volume ($ and loans) by tag, monthly</td><td>F share should rise as pricing responds</td></tr>
+  </table></div>
+  <p class="src">Metrics agreed at the Oct-2026 Go / No-Go. First 3-month read is due about 3 months after launch. Supporting notebooks: <code>B2B_Score_Monitoring.ipynb</code>, <code>B2B_Client_Score_Stability_Analysis.ipynb</code>, <code>B2B_Score_Backtest_08242026.ipynb</code>.</p>
+  <h4>Model-health checks each month</h4>
+  <ul>
+    <li>Cohort coverage of report-month loan-months (expected about 100%). Count of loans with missing baseline attributes (latest: 276).</li>
+    <li>Number of cohorts in use (latest: 106 of 109 populated) and any loans landing in extrapolated-only rules (latest: 0).</li>
+    <li>Loan-level cohort invariance = 0 violations.</li>
+    <li>Audit tie-outs at 0 difference against <code>rawTotal</code>.</li>
+  </ul>
+  <h4>Change control</h4>
+  <p>Changes to cohort artifacts, merge parameters, fallback constants (<code>MIN_COHORT_LOANS</code>, the 1.25 / 0.75 tag bands, the log multiplier) or source tables need DSA review and sign-off from the B2B business owner. Record each change in the change log above.</p>
+</section>
+
+<!-- ===================================================== 12 -->
+<section id="s12">
+  <h2><span class="num">12</span>Assumptions, limitations &amp; open items</h2>
+  <h3>Design assumptions</h3>
+  <ul>
+    <li>The five features capture the main <i>expected</i> differences in prepayment between loans. What is left between a client and its peers is attributed to the client (origination quality, borrower targeting, retention practices).</li>
+    <li>The cohort is fixed at the pricing decision. Later changes in balance, rate environment or remaining term do not move a loan. Those changes affect all peers in the cohort equally.</li>
+    <li>Cohorts were learned on <i>seasoned active</i> loans (Jun / Jul-2026 tapes) but are applied to attributes <i>at lock or funding</i>. Band edges are therefore used as a peer-grouping device, not as calibrated CPR forecasts.</li>
+  </ul>
+  <h3>Known limitations</h3>
+  <ul>
+    <li><b>Benchmark weighting.</b> The peer benchmark weights each cohort the client touches by its full peer balance, not by the client's own mix (<a href="#s7-cpr">7.2</a>). A client with a small position in a large, fast or slow cohort pulls that cohort's full weight into its benchmark. A client-mix-weighted variant would be a candidate enhancement for the next review.</li>
+    <li><b>Training window.</b> Two monthly snapshots in a single rate environment. Held-out tests are by loan, not out-of-time. <code>SE_Mean</code> treats repeat monthly observations as independent, so it understates uncertainty.</li>
+    <li><b>Within-cohort dispersion.</b> Loan-weighted CV is 0.265. 77 of 109 cohorts (51.2% of UPB) carry at least one caution flag (SE, count floor or CV &gt; 0.25), mostly CV. Forced merges of sparse bands can combine different speeds (most often FHA / VA ≤ 240 months and OTHERS).</li>
+    <li><b>Sparse segments.</b> 7 populated cohorts stay below the 1,500-observation floor, because merges never cross LoanType, term or FICO. 7 Missing-term rules have no training estimate. Current production loans do not land in them.</li>
+    <li><b>Small clients.</b> Fewer than 20 loan-months gives a neutral CPRScore (1.0). The zero-prepay multiplier jumps from 1.0× to 1.63× at n = 20.</li>
+  </ul>
+  <h3>Open items to resolve</h3>
+  <div class="tblwrap"><table>
+    <tr><th style="width:36px">#</th><th>Item</th><th style="width:140px">Status</th></tr>
+    <tr><td>1</td><td>The internal audit tie-out (<code>build_tieout</code>) reported 35 of 1,059 clients as MISMATCH (max difference 3.94) in the latest run, while the <code>rawTotal</code> reconciliation matched all 772 matched clients exactly. Also, <code>B2B_functions_cpr_audit.py</code> imports <code>B2B_functions_cohort_score</code> rather than the production <code>_logfallback</code> module. Align the imports and investigate.</td><td><span class="tag a">Open</span></td></tr>
+    <tr><td>2</td><td><code>B2BPricingHist2</code> (the new performance and recapture source) has no build procedure in the repo. Add its SQL so the V2 <code>CohortRecap</code> definition can be versioned and documented from code.</td><td><span class="tag a">Open</span></td></tr>
+    <tr><td>3</td><td>Market-rate consistency: the training tapes carry their own <code>Market_Rate</code> (6.490% Jun / 6.542% Jul-2026). Production uses the 3-series blend (6.487% / 6.735% at the same month-ends). Confirm and align the source at the next cohort refresh.</td><td><span class="tag a">Open</span></td></tr>
+    <tr><td>4</td><td>The Stage 2 universe reads <code>B2BPricingHist</code> while Stage 3 performance reads <code>B2BPricingHist2</code>. Confirm that both contain the same loan universe, so no scored loan-month lacks a cohort for this reason.</td><td><span class="tag a">Open</span></td></tr>
+    <tr><td>5</td><td>DQ score refresh: next phase after go-live.</td><td><span class="tag b">Planned</span></td></tr>
+  </table></div>
+</section>
+
+<!-- ===================================================== 13 -->
+<section id="s13">
+  <h2><span class="num">13</span>Frequently asked questions</h2>
+  <details open><summary>What is a "peer cohort"?</summary><p>A group of loans that share the same loan type, remaining-term band, FICO band, balance group and rate-vs-market group when they were priced. There are 116 such groups. A client's loans are compared only with other lenders' loans in the same groups.</p></details>
+  <details><summary>Does the score use a prepayment model?</summary><p>Only to <i>design</i> the cohorts, which means choosing features and band edges. The benchmark itself is the actual run-off of peer loans in the same months. No forecast enters the score.</p></details>
+  <details><summary>Why is the portfolio CPRScore exactly 1.00?</summary><p>For the Total row, the peers are every loan in the book, so the client and benchmark CPR are the same number. A client's score therefore shows its position relative to the book, and a market-wide refinance wave does not lower everyone's score.</p></details>
+  <details><summary>Can a loan change cohort over time?</summary><p>No. The cohort is set from attributes at lock (Correspondent) or funding (Co-Issue). Every month is checked for invariance. Cohorts change only when the whole set of definitions is refreshed, and then all history is re-scored.</p></details>
+  <details><summary>Why use the lock date for Correspondent?</summary><p>That is when the rate (and so the refinance incentive against the market) is set and the purchase is priced. Using the lock-date market rate measures the loan's incentive as the pricing decision saw it.</p></details>
+  <details><summary>Is lower or higher better?</summary><p>CPRScore: lower is better (slower prepayment). RecapScore and TotalScore: higher is better. Tags: Favorable is TotalScore ≥ 1.25 × portfolio, Unfavorable is &lt; 0.75 × portfolio.</p></details>
+  <details><summary>What happens to small clients or clients with no payoffs?</summary><p>Under 20 loan-months gives CPRScore = 1.0 (neutral). If a client had no prepayment at all, TotalScore = portfolio TotalScore × (1.0 if n &lt; 20, else 1.25 × log<sub>10</sub> n). See <a href="#s7-fallback">7.4</a>.</p></details>
+  <details><summary>Why did my client's tag change from the legacy score?</summary><p>The client's own CPR did not change. The yardstick did. The legacy model under-predicted prepayment by different amounts per loan type (most for VA). Clients heavy in under-predicted segments improve. Clients that prepay faster than their own look-alikes fall.</p></details>
+  <details><summary>Are PLS or unmapped loans scored?</summary><p>They count in volume metrics but are left out of both sides of the CPR ratio. Report-month coverage is about 100%.</p></details>
+  <details><summary>How do I reproduce a client's CPRScore?</summary><p>Use <code>cprAuditWide</code> or <code>md.B2B_CPRScore_Audit</code>. They hold the client's balances and loan-months per cohort and the pooled peer balances. Client CPR = 1 − (Σ client end ÷ Σ client begin)<sup>12</sup>. Peer CPR = 1 − (Σ cohort end ÷ Σ cohort begin)<sup>12</sup> over the client's cohorts. Divide one by the other.</p></details>
+  <details><summary>Are the FICO / LTV / rate bands in the report the cohort bands?</summary><p>No. Report bands (FICO 780+ / 740 / 700 …, LTV, DTI, note-rate and average-loan-balance buckets) are display slices. Cohort bands are listed in <a href="#appA">Appendix A</a>.</p></details>
+</section>
+
+<!-- ===================================================== 14 -->
+<section id="s14">
+  <h2><span class="num">14</span>Glossary</h2>
+  <div class="tblwrap"><table>
+    <tr><th style="width:200px">Term</th><th>Meaning</th></tr>
+    <tr><td>CPR</td><td>Conditional Prepayment Rate: the annualized share of balance that prepays. Here 1 − (End ÷ Begin)<sup>12</sup> on pooled month-over-month balances.</td></tr>
+    <tr><td>ModelCPR</td><td>The valuation model's projected loan-level CPR. Legacy benchmark, and the target used to design cohorts.</td></tr>
+    <tr><td>Cohort / Rule_Bucket</td><td>One of 116 peer groups defined by LoanType × Term × FICO × Balance group × Spread group.</td></tr>
+    <tr><td>Rate spread</td><td>Note rate − blended 30-year market rate at the anchor date. Positive means in the money to refinance.</td></tr>
+    <tr><td>Anchor date (CohortBaseDt)</td><td>Lock date (Correspondent) or fund date (Co-Issue and others). The date the cohort inputs are taken from.</td></tr>
+    <tr><td>Loan-month</td><td>One loan observed in one month-end snapshot. Basis for <code>LoanCt</code> / <code>CPRLoanct</code>.</td></tr>
+    <tr><td>Score window / funding window</td><td>Months of performance measured / months of funded volume reported.</td></tr>
+    <tr><td>Recapture</td><td>Balance of a new Onity loan originated when a serviced loan pays off, ÷ the payoff balance.</td></tr>
+    <tr><td>SE_Mean, CV</td><td>Standard error of the cohort mean (Std ÷ √N) and coefficient of variation (Std ÷ Mean).</td></tr>
+    <tr><td>F / N / U</td><td>Favorable / Neutral / Unfavorable client tag relative to the portfolio TotalScore.</td></tr>
+    <tr><td>PIF</td><td>Paid in full (loan payoff).</td></tr>
+  </table></div>
+</section>
+
+<!-- ===================================================== A -->
+<section id="appA">
+  <h2><span class="num">A</span>Appendix A — Cohort band reference (schema v4)</h2>
+  <div class="tblwrap"><table>
+    <tr><th style="width:190px">Band</th><th>Labels (exact join keys)</th><th>Missing / invalid</th></tr>
+    <tr><td><code>LoanType</code></td><td><code>CONV</code>, <code>FHA</code>, <code>VA</code>, <code>OTHERS</code></td><td>Trim and upper-case; <code>CONV-PMI</code> → CONV; anything else → OTHERS</td></tr>
+    <tr><td><code>RemainingTermBand</code></td><td><code>&lt;=240mo</code>, <code>&gt;240mo</code></td><td>Null / negative → <code>Missing</code></td></tr>
+    <tr><td><code>FICOOrigBand</code></td><td><code>&lt;=750</code>, <code>&gt;750</code></td><td>Null, ≤ 300 or ≥ 850 → <code>&lt;=750</code></td></tr>
+    <tr><td><code>PrinBalBand</code></td><td><code>&lt;=150k</code>, <code>150-250k</code>, <code>250-400k</code>, <code>&gt;400k</code></td><td>Required (unscorable if missing)</td></tr>
+    <tr><td><code>RateSpreadBand</code></td><td><code>(-Inf, -2%]</code> · <code>(-2%, -1.75%]</code> · <code>(-1.75%, -1.5%]</code> · <code>(-1.5%, -1.25%]</code> · <code>(-1.25%, -1%]</code> · <code>(-1%, -0.75%]</code> · <code>(-0.75%, -0.5%]</code> · <code>(-0.5%, -0.25%]</code> · <code>(-0.25%, 0%]</code> · <code>(0%, +0.25%]</code> · <code>(+0.25%, +0.5%]</code> · <code>(+0.5%, +0.75%]</code> · <code>(+0.75%, +1%]</code> · <code>(+1%, +1.25%]</code> · <code>(+1.25%, +1.5%]</code> · <code>(+1.5%, +1.75%]</code> · <code>(+1.75%, +2%]</code> · <code>(+2%, +Inf]</code></td><td>Required (needs IntRate and Market_Rate)</td></tr>
+  </table></div>
+  <p>Assignment: band → join <code>prinbal_map.csv</code> on (LoanType, Term, FICO, PrinBalBand) to get <code>PrinBalGroup</code> → join <code>spread_map.csv</code> on (…, PrinBalGroup, RateSpreadBand) to get <code>RateSpreadGroup</code> → join <code>cohort_definitions.csv</code> on the five <code>cohort_keys</code>. Read CSVs with <code>dtype=str, keep_default_na=False</code>. The maps have 96 and 648 rows, and all 1,728 combinations map to a rule.</p>
+</section>
+
+<!-- ===================================================== B -->
+<section id="appB">
+  <h2><span class="num">B</span>Appendix B — Source reconciliation</h2>
+  <p>Earlier materials were checked against the production code. Where they disagree, this document follows the code.</p>
+  <div class="tblwrap"><table>
+    <tr><th style="width:200px">Topic</th><th>Earlier material says</th><th>Code (used here)</th></tr>
+    <tr><td>Cohort features</td><td>Methodology note: investor type, loan age, FICO, balance, rate spread</td><td>LoanType, RemainingTerm, FICO, balance, rate spread. Investor and loan age are excluded (that was the v2 design).</td></tr>
+    <tr><td>Cohort count and fit</td><td>Note: 164 cohorts, ~73% variance explained, all meet precision target</td><td>116 rules / 109 populated, 75.2% variance explained, 107 / 109 meet the SE target</td></tr>
+    <tr><td>Merge passes</td><td>Note: three passes (FICO → balance → spread)</td><td>Two passes (balance → spread). FICO, term and LoanType are fixed and never merged.</td></tr>
+    <tr><td>Term bands</td><td>Note: 0–2 / 2–5 / 5–10 / 10+ yrs. Notebook header: "240/360-month bands". Deck: "term at origination ≤ 20 / &gt; 20 yr"</td><td>Single cut at 240 months of <i>remaining</i> term at the anchor: <code>&lt;=240mo</code>, <code>&gt;240mo</code>, <code>Missing</code></td></tr>
+    <tr><td>Product bands</td><td>Note / deck: Conventional, FHA, VA</td><td>CONV, FHA, VA, plus OTHERS (USDA / FARM / unknown)</td></tr>
+    <tr><td>Anchor date channels</td><td>Deck: Correspondent = lock, Co-Issue = fund</td><td>Same, plus Consumer Direct and any other channel = fund. Correspondent falls back to fund if the lock date is null.</td></tr>
+    <tr><td>Stage 2 source</td><td>Recorded SQL output in the notebook shows <code>B2BPricingHist2</code></td><td>Current code reads <code>Analytics_Rpt.md.B2BPricingHist</code></td></tr>
+    <tr><td>Stage 3 header</td><td>Notebook markdown cites <code>B2B_functions_cohort_score.py</code></td><td>Notebook imports <code>B2B_functions_cohort_score_logfallback.py</code> (production)</td></tr>
+    <tr><td>Client tag counts</td><td>Deck (May-2026 window): 807 clients, 270 F / 236 N / 301 U</td><td>Latest notebook run (Oct-25 → May-26 window): 806 clients, 314 F / 262 N / 230 U. Counts depend on the window.</td></tr>
+  </table></div>
+</section>
+
+</main>
+</div>
+
+<footer>
+  <div>© 2026 Onity Group Inc. All rights reserved. Proprietary and Confidential</div>
+  <div>Data Science &amp; Analytics · B2B Client Score Whitepaper v1.0 · <a href="#top" style="color:#fff">Back to top ↑</a></div>
+</footer>
+
+</body>
+</html>

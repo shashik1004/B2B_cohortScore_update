@@ -1,0 +1,27 @@
+{
+  "folders": [
+	{
+		"name": "DSA Agent Harness",
+		"path": "../../Onity-Recall"
+	},
+	{
+		"path": ".."
+	}
+],
+  "settings": {
+    "github.copilot.chat.codeGeneration.instructions": [
+      { "file": ".github/copilot-instructions.md" },
+      { "file": "memory/dsa-team.md" }
+    ],
+    "github.copilot.chat.reviewSelection.instructions": [
+      { "file": ".github/copilot-instructions.md" }
+    ],
+    "chat.promptFiles": true
+  },
+  "extensions": {
+    "recommendations": [
+      "GitHub.copilot",
+      "GitHub.copilot-chat"
+    ]
+  }
+}
