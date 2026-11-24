@@ -1,0 +1,139 @@
+{
+  "schema_version": 4,
+  "generated_from": [
+    "LL_Pricing_06302026_Enriched.csv",
+    "LL_Pricing_07312026_Enriched.csv"
+  ],
+  "training_periods": [
+    "2026-06-30",
+    "2026-07-31"
+  ],
+  "training_market_rates": {
+    "2026-06-30": 6.49,
+    "2026-07-31": 6.542
+  },
+  "cohort_keys": [
+    "LoanType",
+    "RemainingTermBand",
+    "FICOOrigBand",
+    "PrinBalGroup",
+    "RateSpreadGroup"
+  ],
+  "loan_types": [
+    "CONV",
+    "FHA",
+    "VA",
+    "OTHERS"
+  ],
+  "loan_type_normalization": {
+    "CONV-PMI": "CONV",
+    "keep": [
+      "CONV",
+      "FHA",
+      "VA"
+    ],
+    "otherwise": "OTHERS",
+    "strip_and_upper": true
+  },
+  "eligibility_note": "Active loans only; existing PLS and seller exclusions retained. InvestorCatgy is used for eligibility only.",
+  "excluded_rule_features": [
+    "InvestorCatgy",
+    "InvestorGroup",
+    "LoanAge",
+    "LTVOrig",
+    "ArmFlag"
+  ],
+  "rate_spread_note": "RateSpread = IntRate - row-level Market_Rate. Scoring requires the loan's snapshot market rate.",
+  "edge_encoding": "Convert the strings '-inf'/'inf' to floating infinities; numeric edges are right-inclusive.",
+  "remainingterm_edges": [
+    "-inf",
+    240.0,
+    "inf"
+  ],
+  "remainingterm_labels": [
+    "<=240mo",
+    ">240mo"
+  ],
+  "remainingterm_missing_label": "Missing",
+  "remainingterm_note": "User-selected <=240 / >240-month buckets; negative/missing term maps to Missing. Term bands are not merged.",
+  "remainingterm_significance_passed": true,
+  "remainingterm_importance": 0.04068891319731647,
+  "ficoorig_edges": [
+    "-inf",
+    750.0,
+    "inf"
+  ],
+  "ficoorig_labels": [
+    "<=750",
+    ">750"
+  ],
+  "ficoorig_missing_label": "<=750",
+  "ficoorig_note": "User-required fixed split at 750, regardless of CART importance. Missing/non-numeric or sentinel scores <=300/>=850 default to <=750. FICO bands are not merged.",
+  "prinbal_edges": [
+    "-inf",
+    150000.0,
+    250000.0,
+    400000.0,
+    "inf"
+  ],
+  "prinbal_labels": [
+    "<=150k",
+    "150-250k",
+    "250-400k",
+    ">400k"
+  ],
+  "spread_edges": [
+    "-inf",
+    -2.0,
+    -1.75,
+    -1.5,
+    -1.25,
+    -1.0,
+    -0.75,
+    -0.5,
+    -0.25,
+    0.0,
+    0.25,
+    0.5,
+    0.75,
+    1.0,
+    1.25,
+    1.5,
+    1.75,
+    2.0,
+    "inf"
+  ],
+  "spread_labels": [
+    "(-Inf, -2%]",
+    "(-2%, -1.75%]",
+    "(-1.75%, -1.5%]",
+    "(-1.5%, -1.25%]",
+    "(-1.25%, -1%]",
+    "(-1%, -0.75%]",
+    "(-0.75%, -0.5%]",
+    "(-0.5%, -0.25%]",
+    "(-0.25%, 0%]",
+    "(0%, +0.25%]",
+    "(+0.25%, +0.5%]",
+    "(+0.5%, +0.75%]",
+    "(+0.75%, +1%]",
+    "(+1%, +1.25%]",
+    "(+1.25%, +1.5%]",
+    "(+1.5%, +1.75%]",
+    "(+1.75%, +2%]",
+    "(+2%, +Inf]"
+  ],
+  "se_mean_target": 0.25,
+  "std_inflation_max": 1.2,
+  "min_cohort_n_floor": 1500,
+  "mean_merge_tol": 0.5,
+  "overall_mean_train": 6.240941231067484,
+  "overall_std_train": 4.644720691502026,
+  "variance_explained_train": 0.7519122200208337,
+  "cohorts_total_train": 116,
+  "cohorts_populated_train": 109,
+  "n_train_total": 1210118,
+  "n_train_distinct_loans": 626132,
+  "avg_cross_period_cpr_range_train": 0.7725288822725356,
+  "reliability_note": "SE is observation-based; repeat monthly observations are not independent. Count floor is not guaranteed for rare LoanType/term/FICO segments."
+}
