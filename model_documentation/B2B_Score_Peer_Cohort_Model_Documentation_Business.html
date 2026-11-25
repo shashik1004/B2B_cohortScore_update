@@ -209,9 +209,8 @@
     <li><a href="#s9">9. New vs older methodology</a></li>
     <li><a href="#s10">10. Code &amp; reference locations</a></li>
     <li><a href="#s11">11. Monitoring</a></li>
-    <li><a href="#s12">12. Limitations &amp; open items</a></li>
-    <li><a href="#s13">13. FAQ</a></li>
-    <li><a href="#s14">14. Glossary</a></li>
+    <li><a href="#s13">12. FAQ</a></li>
+    <li><a href="#s14">13. Glossary</a></li>
     <li><a href="#appA">Appendix — Reading a cohort rule</a></li>
   </ol>
 </nav>
@@ -725,27 +724,7 @@
 
 <!-- ===================================================== 12 -->
 <section id="s12">
-  <h2><span class="num">12</span>Limitations &amp; open items</h2>
-  <h3>Things to keep in mind</h3>
-  <ul>
-    <li><b>Peers are look-alikes, not twins.</b> Five features capture the main differences in expected prepayment. Whatever difference remains between a client and its peers is attributed to the client.</li>
-    <li><b>The benchmark reflects the peer groups.</b> Each cohort a client has loans in counts with the full balance of all peer loans in it. The benchmark shows how those peer groups performed, not a replica of the client's exact mix.</li>
-    <li><b>Small clients get a neutral score.</b> With fewer than 20 loan-months in the window, CPRScore is set to 1.0, so tags for very small clients carry little information.</li>
-    <li><b>The score depends on the window.</b> Tags can change when the score window changes, which is why tag stability is monitored.</li>
-    <li><b>The cohorts were built from two months of data.</b> They are periodically reviewed and can be refreshed. All history is then re-tagged.</li>
-  </ul>
-  <h3>Open items</h3>
-  <div class="tblwrap"><table>
-    <tr><th style="width:36px">#</th><th>Item</th><th style="width:120px">Status</th></tr>
-    <tr><td>1</td><td>Add the build procedure for <code>B2BPricingHist2</code> (the performance and recapture source) to the repository, so the recapture benchmark definition is documented from code.</td><td><span class="tag a">Open</span></td></tr>
-    <tr><td>2</td><td>Align the market-rate source used to build the cohorts with the 3-series blend used to assign them, at the next cohort review.</td><td><span class="tag a">Open</span></td></tr>
-    <tr><td>3</td><td>Confirm that <code>B2BPricingHist</code> (cohort assignment) and <code>B2BPricingHist2</code> (scoring) cover the same loan universe.</td><td><span class="tag a">Open</span></td></tr>
-  </table></div>
-</section>
-
-<!-- ===================================================== 13 -->
-<section id="s13">
-  <h2><span class="num">13</span>Frequently asked questions</h2>
+  <h2><span class="num">12</span>Frequently asked questions</h2>
   <details open><summary>What is a "peer cohort"?</summary><p>A group of loans that shared the same loan type, remaining-term band, FICO band, balance group and rate-vs-market group when they were priced. There are 116 such groups. A client's loans are compared only with other lenders' loans in the same groups.</p></details>
   <details><summary>Does the score use a prepayment model?</summary><p>Only to design the cohorts. The benchmark is the actual run-off of peer loans in the same months.</p></details>
   <details><summary>Why is the portfolio CPRScore exactly 1.00?</summary><p>For the whole book, the client and the peers are the same loans. Each client's score therefore shows its position relative to the book, and a market-wide refinance wave does not push every client's score down at once.</p></details>
@@ -757,9 +736,9 @@
   <details><summary>Are the FICO / LTV / rate bands in the report the cohort bands?</summary><p>No. Report bands (FICO 780+ / 740 / 700 …, LTV, DTI, note-rate and loan-balance buckets) are display breakdowns. Cohort bands are described in <a href="#s5">Section 5.3</a> and the <a href="#appA">Appendix</a>.</p></details>
 </section>
 
-<!-- ===================================================== 14 -->
-<section id="s14">
-  <h2><span class="num">14</span>Glossary</h2>
+<!-- ===================================================== 13 -->
+<section id="s13">
+  <h2><span class="num">13</span>Glossary</h2>
   <div class="tblwrap"><table>
     <tr><th style="width:200px">Term</th><th>Meaning</th></tr>
     <tr><td>CPR</td><td>Conditional Prepayment Rate: the annualized share of balance that prepays. Here 1 − (ending balance ÷ beginning balance)<sup>12</sup>.</td></tr>
